@@ -14,14 +14,11 @@ fileindexer::fileindexer() {
     indexFile("C:\\Users\\maxim\\Documents\\QT", connectionName, db);
 }
 
-// pas de server encore mais juste le dossier/base de donnée
 void fileindexer::indexFile(QString directory, QString connectionName, QSqlDatabase db) {
-    // Start indexing the file
     qDebug() << "Info: Indexing started" << directory;
 
-
     QSqlQuery query(db);
-    query.prepare(QLatin1String("INSERT OR REPLACE INTO files (filePath, fileSize, fileMTime) VALUES (?, ?, ?)"));
+    query.prepare(QLatin1String("INSERT OR REPLACE INTO files (filePath, fileSize, fileMTime, fileLastCheck) VALUES (?, ?, ?, ?)"));
 
     QDirIterator it(directory, QDirIterator::Subdirectories);
     int indexedFiles = 0;
@@ -31,11 +28,10 @@ void fileindexer::indexFile(QString directory, QString connectionName, QSqlDatab
         QString filePath = it.next();
         QFileInfo fileInfo(filePath);
 
-        query.addBindValue(indexedFiles);
         query.addBindValue(fileInfo.absoluteFilePath());
         query.addBindValue(fileInfo.size());
-        query.addBindValue(fileInfo.lastModified().toString());
-        query.addBindValue(1);
+        query.addBindValue(fileInfo.lastModified().toSecsSinceEpoch());
+        query.addBindValue(QDateTime::currentDateTime().toSecsSinceEpoch());
 
         if (!query.exec()) {
             qWarning("Error: Failed to insert file: %s", qPrintable(query.lastError().text()));
