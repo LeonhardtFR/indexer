@@ -8,120 +8,80 @@
 void server::create_database() {
     qDebug() << "Info: Initializing the database...";
 
-    // Nom unique de la connection
     QString connectionName = "indexerConnection";
-
-    // Create database with a specific connection name
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
-    if (db.lastError().isValid()) {
+    if (!db.isValid()) {
         qFatal() << "Error: Cannot add database" << db.lastError().text();
         return;
     }
 
-    // getting system application data folder
     QString appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-
-    // creating the folder if it doesn't exist
     QDir dir(appDataLocation);
-    if (!dir.exists()) {
-        dir.mkdir(appDataLocation);
-        qDebug() << "mkdir" << appDataLocation;
+    if (!dir.exists() && !dir.mkdir(appDataLocation)) {
+        qFatal() << "Error: Cannot create directory" << appDataLocation;
+        return;
     }
 
-    // setup the db file name and open it
-    QString dbPath = appDataLocation + "/indexerFile.db";
-    qDebug() << "dbPath" << dbPath;
-    db.setDatabaseName(dbPath);
+    db.setDatabaseName(appDataLocation + "/indexerFile.db");
     if (!db.open()) {
-        qFatal() << "Error: Cannot open database" << db.lastError().text() << dbPath;
+        qFatal() << "Error: Cannot open database" << db.lastError().text();
         return;
     }
 
-    // Get the database instance with the specific connection name
-    QSqlDatabase dbInstance = QSqlDatabase::database(connectionName);
-    QSqlQuery query(dbInstance);
-
-    // create a table
-    QString tblFileCreate = "CREATE TABLE IF NOT EXISTS files ("
-                            "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                            "filePath STRING,"
-                            "fileSize BIGINT,"
-                            "fileMTime BIGINT,"
-                            "fileLastCheck BIGINT"
-                            ")";
-    query.exec(tblFileCreate);
-
-    if (query.lastError().isValid()) {
-        qWarning() << "CREATE TABLE" << query.lastError().text();
+    QSqlQuery dropQuery(db);
+    if (!dropQuery.exec("DROP TABLE IF EXISTS files")) {
+        qFatal() << "Error: " << dropQuery.lastError().text();
         return;
     }
 
-    const int INSERTS_COUNT = 10;
-    for (int i = 0; i <= INSERTS_COUNT; i++) {
-        QString sqlInsert = "INSERT INTO files (filePath, fileSize, fileMTime, fileLastCheck) " +
-                            QString("VALUES('file%1',%1,%1,%1)").arg(i);
-        query.exec(sqlInsert);
+    QSqlQuery query(db);
 
-        if (query.lastError().isValid()) {
-            qWarning() << "INSERT" << query.lastError().text();
+    QString tblFileCreate = R"(
+        CREATE TABLE IF NOT EXISTS files (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            filePath STRING,
+            fileSize BIGINT,
+            fileMTime BIGINT,
+            fileLastCheck BIGINT
+        )
+    )";
+    if (!query.exec(tblFileCreate)) {
+        qFatal() << "Error: " << query.lastError().text();
+        return;
+    }
+
+    for (int i = 0; i <= 10; i++) {
+        if (!query.exec(QString("INSERT INTO files (filePath, fileSize, fileMTime, fileLastCheck) VALUES('file%1',%1,%1,%1)").arg(i))) {
+            qFatal() << "Error: " << query.lastError().text();
             return;
         }
     }
 
-    // query the data
-    QString sqlSelect = "SELECT * FROM files";
-    query.exec(sqlSelect);
-
-    if (query.lastError().isValid()) {
-        qWarning() << "SELECT" << query.lastError().text();
+    if (query.exec("SELECT * FROM files")) {
+        while (query.next()) {
+            qDebug() << query.value("id").toUInt() << query.value("filePath").toString()
+                     << query.value("fileSize").toUInt() << query.value("fileMTime").toUInt()
+                     << query.value("fileLastCheck").toUInt();
+        }
+    } else {
+        qFatal() << "Error: " << query.lastError().text();
         return;
     }
 
-    while (query.next()) {
-        uint    id            = query.value("id").toUInt();
-        QString filePath      = query.value("filePath").toString();
-        uint    fileSize      = query.value("fileSize").toUInt();
-        uint    fileMTime     = query.value("fileMTime").toUInt();
-        uint    fileLastCheck = query.value("fileLastCheck").toUInt();
-        qDebug() << id << filePath << fileSize << fileMTime << fileLastCheck;
-    }
-
-    // update some data
-    QString sqlUpdate = "UPDATE files SET filePath='TESTME' WHERE id=1";
-    query.exec(sqlUpdate);
-    if (query.lastError().isValid()) {
-        qWarning() << "UPDATE" << query.lastError().text();
+    if (!query.exec("UPDATE files SET filePath='TESTME' WHERE id=1")) {
+        qFatal() << "Error: " << query.lastError().text();
         return;
     }
 
-    // check the update
-    sqlSelect = "SELECT * FROM files WHERE id=1";
-    query.exec(sqlSelect);
-
-    if (query.lastError().isValid()) {
-        qWarning() << "SELECT" << query.lastError().text();
+    if (query.exec("SELECT * FROM files WHERE id=1")) {
+        while (query.next()) {
+            QString filePath = query.value("filePath").toString();
+            qDebug() << filePath;
+            qDebug() << (filePath == "TESTME" ? "UPDATE SUCCESS" : "UPDATE FAILS");
+        }
+    } else {
+        qFatal() << "Error: " << query.lastError().text();
         return;
     }
-
-    while (query.next()) {
-        uint    id            = query.value("id").toUInt();
-        QString filePath      = query.value("filePath").toString();
-        uint    fileSize      = query.value("fileSize").toUInt();
-        uint    fileMTime     = query.value("fileMTime").toUInt();
-        uint    fileLastCheck = query.value("fileLastCheck").toUInt();
-        qDebug() << id << filePath << fileSize << fileMTime << fileLastCheck;
-        if (filePath == "TESTME") {
-            qDebug() << "UPDATE SUCCESS";
-        } else
-            qDebug() << "UPDATE FAILS";
-    }
-
     qDebug() << "Info: Database initialized successfully";
-
-    // drop the table
-    //    query.exec("DROP TABLE files");
-    //    if (query.lastError().isValid()) {
-    //        qWarning() << "DROP TABLE" << query.lastError().text();
-    //    }
-    return;
 }

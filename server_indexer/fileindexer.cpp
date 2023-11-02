@@ -4,6 +4,7 @@
 #include "QSqlQuery"
 #include "QDirIterator"
 #include "QSqlError"
+#include "QElapsedTimer"
 
 // Indexes the files in the database.
 fileindexer::fileindexer() {
@@ -11,17 +12,29 @@ fileindexer::fileindexer() {
     QString connectionName = "indexerConnection";
     QSqlDatabase db = QSqlDatabase::database(connectionName);
 
-    indexFile("C:\\Users\\maxim\\Documents\\QT\\tuto_1", connectionName, db);
+    int indexedFiles = 0;
+
+    QElapsedTimer timer;
+    timer.start();
+
+    indexFile("C:\\Qt", connectionName, db, indexedFiles);
+
+    double rate = 0;
+    double iElapsed = double(timer.elapsed()) / 1000;
+    if (iElapsed) {
+        rate = indexedFiles / iElapsed;
+    }
+    qDebug() << "Info: Indexing completed in" << iElapsed << "seconds -" << rate << "files/s";
 }
 
-void fileindexer::indexFile(QString directory, QString connectionName, QSqlDatabase db) {
+void fileindexer::indexFile(QString directory, QString connectionName, QSqlDatabase db, int& indexedFiles) {
     qDebug() << "Info: Indexing started" << directory;
 
     QSqlQuery query(db);
     query.prepare(QLatin1String("INSERT OR REPLACE INTO files (filePath, fileSize, fileMTime, fileLastCheck) VALUES (?, ?, ?, ?)"));
 
     QDirIterator it(directory, QDirIterator::Subdirectories);
-    int indexedFiles = 0;
+    indexedFiles = 0;  // Réinitialisez le compteur de fichiers indexés
 
     db.transaction();  // Begin a transaction for bulk insertion
     while (it.hasNext()) {
@@ -40,12 +53,11 @@ void fileindexer::indexFile(QString directory, QString connectionName, QSqlDatab
             }
 
             indexedFiles++;
-            qDebug() << "Info: Indexed" << indexedFiles << "files";
-            qDebug() << "File : " << fileInfo.absoluteFilePath();
         }
     }
     db.commit();  // Commit the transaction
-    qDebug() << "Info: Indexing completed";
+    qDebug() << "Info: Finished indexing" << indexedFiles << "files";
+
     db.close();
     QSqlDatabase::removeDatabase(connectionName);
 }
