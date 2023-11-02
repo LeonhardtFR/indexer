@@ -11,11 +11,14 @@ class server : public QObject {
 public:
     server();
 
-private:
-    void create_database();
-    void newConnection();
+    static void create_database();
 
-    QTcpServer *tcpServer;
+private:
+//    void newConnection();
+//    void handleSocketData();
+//    void handleSocketError(QAbstractSocket::SocketError error);
+
+//    QTcpServer *tcpServer;
 
 private slots:
 

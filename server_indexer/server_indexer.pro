@@ -10,6 +10,7 @@ CONFIG += c++17 cmdline
 
 SOURCES += \
         db_indexer.cpp \
+        fileindexer.cpp \
         main.cpp \
         server.cpp
 
@@ -19,4 +20,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    fileindexer.h \
     server.h
