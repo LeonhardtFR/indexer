@@ -119,9 +119,9 @@ void server::create_database() {
     qDebug() << "Info: Database initialized successfully";
 
     // drop the table
-//    query.exec("DROP TABLE files");
-//    if (query.lastError().isValid()) {
-//        qWarning() << "DROP TABLE" << query.lastError().text();
-//    }
+    //    query.exec("DROP TABLE files");
+    //    if (query.lastError().isValid()) {
+    //        qWarning() << "DROP TABLE" << query.lastError().text();
+    //    }
     return;
 }
