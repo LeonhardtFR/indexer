@@ -11,12 +11,12 @@ void server::create_database() {
     // Nom unique de la connection
     QString connectionName = "indexerConnection";
 
+    // Create database with a specific connection name
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
     if (db.lastError().isValid()) {
-            qFatal() << "Error: Cannot add database" << db.lastError().text();
-            return;
-        }
-
+        qFatal() << "Error: Cannot add database" << db.lastError().text();
+        return;
+    }
 
     // getting system application data folder
     QString appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
@@ -24,10 +24,9 @@ void server::create_database() {
     // creating the folder if it doesn't exist
     QDir dir(appDataLocation);
     if (!dir.exists()) {
-            dir.mkdir(appDataLocation);
-            qDebug() << "mkdir" << appDataLocation;
+        dir.mkdir(appDataLocation);
+        qDebug() << "mkdir" << appDataLocation;
     }
-
 
     // setup the db file name and open it
     QString dbPath = appDataLocation + "/indexerFile.db";
@@ -38,6 +37,10 @@ void server::create_database() {
         return;
     }
 
+    // Get the database instance with the specific connection name
+    QSqlDatabase dbInstance = QSqlDatabase::database(connectionName);
+    QSqlQuery query(dbInstance);
+
     // create a table
     QString tblFileCreate = "CREATE TABLE IF NOT EXISTS files ("
                             "id INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -46,15 +49,12 @@ void server::create_database() {
                             "fileMTime BIGINT,"
                             "fileLastCheck BIGINT"
                             ")";
-    QSqlQuery query;
     query.exec(tblFileCreate);
 
     if (query.lastError().isValid()) {
         qWarning() << "CREATE TABLE" << query.lastError().text();
         return;
     }
-
-
 
     const int INSERTS_COUNT = 10;
     for (int i = 0; i <= INSERTS_COUNT; i++) {
