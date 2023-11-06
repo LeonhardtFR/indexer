@@ -9,7 +9,7 @@ class fileindexer : public QObject {
 
 public:
     fileindexer();
-    static void indexFile(QString filePath, QString connectionName, QSqlDatabase db, int& indexedFiles);
+    static void indexFile(const QString &directory, QSqlDatabase &db, int &indexedFiles);
 
 private:
     void insertFile(QString filePath);
