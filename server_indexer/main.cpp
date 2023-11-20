@@ -7,10 +7,7 @@ int main(int argc, char *argv[]) {
 
     // Initialize the database indexer
     server::create_database();
+    server server;
 
-    // Start indexer
-    fileindexer indexer;
-
-//    server server;
     return a.exec();
 }

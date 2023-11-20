@@ -1,18 +1,20 @@
 #ifndef FILEINDEXER_H
 #define FILEINDEXER_H
 
+#include "fileindexer_worker.h"
 #include <QObject>
-#include "QSqlDatabase"
+#include <QThread>
 
 class fileindexer : public QObject {
     Q_OBJECT
 
 public:
     fileindexer();
-    static void indexFile(const QString &directory, QSqlDatabase &db, int &indexedFiles);
 
 private:
-    void insertFile(QString filePath);
+    fileindexer_worker *indexerWorker;
+    QThread workerThread;
+
 
 };
 

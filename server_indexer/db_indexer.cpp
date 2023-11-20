@@ -50,13 +50,6 @@ void server::create_database() {
         return;
     }
 
-    for (int i = 0; i <= 10; i++) {
-        if (!query.exec(QString("INSERT INTO files (filePath, fileSize, fileMTime, fileLastCheck) VALUES('file%1',%1,%1,%1)").arg(i))) {
-            qFatal() << "Error: " << query.lastError().text();
-            return;
-        }
-    }
-
     if (query.exec("SELECT * FROM files")) {
         while (query.next()) {
             qDebug() << query.value("id").toUInt() << query.value("filePath").toString()
@@ -68,20 +61,5 @@ void server::create_database() {
         return;
     }
 
-    if (!query.exec("UPDATE files SET filePath='TESTME' WHERE id=1")) {
-        qFatal() << "Error: " << query.lastError().text();
-        return;
-    }
-
-    if (query.exec("SELECT * FROM files WHERE id=1")) {
-        while (query.next()) {
-            QString filePath = query.value("filePath").toString();
-            qDebug() << filePath;
-            qDebug() << (filePath == "TESTME" ? "UPDATE SUCCESS" : "UPDATE FAILS");
-        }
-    } else {
-        qFatal() << "Error: " << query.lastError().text();
-        return;
-    }
     qDebug() << "Info: Database initialized successfully";
 }

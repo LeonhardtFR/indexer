@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "connect_server.h"
 #include <QMainWindow>
 
 #include <QLineEdit>
@@ -16,15 +17,16 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class mainwindow; }
 QT_END_NAMESPACE
 
-class mainwindow : public QMainWindow
-{
+class mainwindow : public QMainWindow {
     Q_OBJECT
 
 public:
     mainwindow(QWidget *parent = nullptr);
     ~mainwindow();
 
-private slots:
+signals:
+    void event_start(QString &directory);
+    void event_stop();
 
 
 private:
@@ -57,6 +59,12 @@ private:
     QTableWidgetItem *itemDate = new QTableWidgetItem("01/01/2023");
     QTableWidgetItem *itemType = new QTableWidgetItem("Fichier Texte");
     QTableWidgetItem *itemSize = new QTableWidgetItem("1 Ko");
+
+    void set_directory();
+    QString get_directory();
+    void start_indexing();
+    void stop_indexing();
+    connect_server *serverConnection;
 
 };
 #endif // MAINWINDOW_H
