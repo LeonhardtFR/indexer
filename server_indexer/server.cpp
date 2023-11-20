@@ -49,12 +49,14 @@ void server::handleSocketData() {
     if (data.startsWith("start")) {
         directory = data.section(':', 1);
         qDebug() << "START";
-        indexerWorker->processCommand(fileindexer_worker::Start, directory);
+        emit commandReceived(fileindexer_worker::Start, directory);
+//        indexerWorker->processCommand(fileindexer_worker::Start, directory);
     }
 
     if (data.startsWith("stop")) {
         qDebug() << "STOP";
-        indexerWorker->processCommand(fileindexer_worker::Stop, directory);
+        emit commandReceived(fileindexer_worker::Stop);
+//        indexerWorker->processCommand(fileindexer_worker::Stop, directory);
     }
 
 }

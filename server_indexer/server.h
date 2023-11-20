@@ -12,12 +12,9 @@ class server : public QObject {
 
 public:
     server();
-    enum Command { Start, Pause, Stop };
+//    enum Command { Start, Pause, Stop };
 
     static void create_database();
-
-signals:
-
 
 private:
     void newConnection();
@@ -29,7 +26,8 @@ private:
     QThread workerThread;
     QString directory;
 
-private slots:
+signals:
+    void commandReceived(fileindexer_worker::Command command, QString directory = QString());
 
 };
 

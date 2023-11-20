@@ -38,8 +38,6 @@ void fileindexer_worker::indexFile(const QString &directory, QSqlDatabase &db, i
     qint64 currentSecs = QDateTime::currentDateTime().toSecsSinceEpoch();
 
     while (it.hasNext()) {
-
-//        QMutexLocker locker(&mutex);
         qDebug() << "Info: Indexing file" << it.next();
 
         if (!isRunning) {
@@ -70,26 +68,39 @@ void fileindexer_worker::indexFile(const QString &directory, QSqlDatabase &db, i
     qDebug() << "Info: Finished indexing" << indexedFiles << "files";
 }
 
-
-// Indexer command (Start/Pause/Stop)
-void fileindexer_worker::processCommand(Command command, QString directory) {
-//    QMutexLocker locker(&mutex);
-    QString connectionName = "indexerConnection";
-    QSqlDatabase db = QSqlDatabase::database(connectionName);
-    int indexedFiles = 0;
+void fileindexer_worker::processCommand(Command command, const QString &directory) {
     switch (command) {
     case Start:
-        // Logique de démarrage
-        qDebug() << "Info: Starting indexer : " + directory;
         isRunning = true;
-        isPaused = false;
-        indexFile(directory, db, indexedFiles);
-        break;
-    case Pause:
-        // Logique de pause
+        indexFile(directory);
         break;
     case Stop:
-        // Logique d'arrêt
+        isRunning = false;
         break;
     }
 }
+
+
+
+
+// Indexer command (Start/Pause/Stop)
+//void fileindexer_worker::processCommand(Command command, QString directory) {
+//    QString connectionName = "indexerConnection";
+//    QSqlDatabase db = QSqlDatabase::database(connectionName);
+//    int indexedFiles = 0;
+//    switch (command) {
+//    case Start:
+//        // Logique de démarrage
+//        qDebug() << "Info: Starting indexer : " + directory;
+//        isRunning = true;
+//        isPaused = false;
+//        indexFile(directory, db, indexedFiles);
+//        break;
+//    case Pause:
+//        // Logique de pause
+//        break;
+//    case Stop:
+//        // Logique d'arrêt
+//        break;
+//    }
+//}

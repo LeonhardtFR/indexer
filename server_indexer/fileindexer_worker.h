@@ -21,7 +21,8 @@ public:
     enum Command { Start, Pause, Stop };
 
     void indexFile(const QString &directory, QSqlDatabase &db, int &indexedFiles); // Index a file in the database
-    void processCommand(Command command, QString directory); // Start/Pause/Stop
+//    void processCommand(Command command, QString directory); // Start/Pause/Stop
+    void processCommand(Command command, const QString &directory);
 
 private:
     void insertFile(QString filePath); // Insert a file in the database
