@@ -3,17 +3,18 @@
 #include "qthread.h"
 
 // Indexes the files in the database.
-fileindexer_worker::fileindexer_worker() {
+fileindexer_worker::fileindexer_worker() : isRunning(false) {
     QElapsedTimer timer;
     timer.start();
 }
 
-void fileindexer_worker::indexFile(const QString &directory, int &indexedFiles) {
+void fileindexer_worker::run() {
+    int indexedFiles = 0;
+
     QString connectionName = QString("indexerConnection_%1").arg((quintptr)QThread::currentThreadId());
     QSqlDatabase db = QSqlDatabase::database(connectionName);
 
     QString appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-
 
     if (!db.isOpen()) {
         // Ouverture de la base de données si elle n'est pas déjà ouverte
@@ -46,9 +47,9 @@ void fileindexer_worker::indexFile(const QString &directory, int &indexedFiles) 
             break;
         }
 
-        while (isPaused) {
-            pauseCondition.wait(&mutex);
-        }
+//        while (isPaused) {
+//            pauseCondition.wait(&mutex);
+//        }
 
         QString filePath = it.next();
         QFileInfo fileInfo(filePath);
@@ -73,18 +74,25 @@ void fileindexer_worker::indexFile(const QString &directory, int &indexedFiles) 
     QSqlDatabase::removeDatabase(connectionName);
 }
 
-void fileindexer_worker::processCommand(Command command, const QString &directory) {
-    int indexedFiles = 0;
+void fileindexer_worker::handleCommand(Command command) {
     switch (command) {
+
     case Start:
         isRunning = true;
-        indexFile(directory, indexedFiles);
+        this->start(); // démarre thread
         break;
+
     case Stop:
-        qDebug() << "TEST10";
-        isRunning = false;
+        isRunning = false; // arrêt thread
         break;
+
     case Pause:
         break;
     }
+}
+
+
+
+void fileindexer_worker::setDirectory(const QString &directory) {
+    this->directory = directory;
 }

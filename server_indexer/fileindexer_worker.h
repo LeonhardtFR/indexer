@@ -12,18 +12,20 @@
 #include "QDateTime"
 #include "QFileInfo"
 #include "QDebug"
+#include "qthread.h"
 
-class fileindexer_worker : public QObject {
+class fileindexer_worker : public QThread {
     Q_OBJECT
 
 public:
     fileindexer_worker();
+    void run() override;
     enum Command { Start, Pause, Stop };
 
+    void setDirectory(const QString &directory);
+    void handleCommand(Command command);
 
-    void indexFile(const QString &directory, int &indexedFiles); // Index a file in the database
-//    void processCommand(Command command, QString directory); // Start/Pause/Stop
-    void processCommand(Command command, const QString &directory);
+    bool isRunning;
 
 private:
     void insertFile(QString filePath); // Insert a file in the database
@@ -31,8 +33,8 @@ private:
 
     QMutex mutex;
     QWaitCondition pauseCondition;
-    bool isRunning;
     bool isPaused;
+    QString directory;
 
 signals:
     void startIndexing(const QString &directory);

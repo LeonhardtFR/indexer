@@ -19,9 +19,7 @@ server::server() {
     }
 
     indexerWorker = new fileindexer_worker();
-    indexerWorker->moveToThread(&workerThread);
-    connect(this, &server::commandReceived, indexerWorker, &fileindexer_worker::processCommand);
-    workerThread.start();
+    connect(this, &server::commandReceived, indexerWorker, &fileindexer_worker::handleCommand);
 }
 
 // Si un nouveau client se connecte
@@ -46,16 +44,13 @@ void server::handleSocketData() {
 
     if (data.startsWith("start")) {
         directory = data.section(':', 1);
-        qDebug() << "START";
-        emit commandReceived(fileindexer_worker::Start, directory);
+        indexerWorker->setDirectory(directory);
+        emit commandReceived(fileindexer_worker::Start); // envoie commande de démarrage
+    } else if (data.startsWith("stop")) {
+        emit commandReceived(fileindexer_worker::Stop); // envoie commande d'arrêt
     }
-
-    if (data.startsWith("stop")) {
-        qDebug() << "STOP";
-        emit commandReceived(fileindexer_worker::Stop);
-    }
-
 }
+
 
 
 // Gestion des erreurs
