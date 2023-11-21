@@ -25,3 +25,6 @@ HEADERS += \
     lexer.h \
     server.h \
     token.h
+
+DISTFILES += \
+    dialect_file.json

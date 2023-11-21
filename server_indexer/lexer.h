@@ -13,35 +13,39 @@ class Lexer : public QObject {
     Q_OBJECT
 
 public:
+    explicit Lexer(QObject *parent = nullptr);
     static Lexer *instance();
+
+    const QString &source() const;
     void setSource(const QString &newSource);
     const QList<Token *> &tokens() const;
-    const Token &nextToken();
-    const Token &currentToken() const;
-    void loadDialect(QString filename);
-
-
-private:
-    explicit Lexer(QObject *parent = nullptr);
-    void tokenize();
-    QString getType(QString token);
-    void addToken(QString token);
-    void addTokenString(QString token);
-    void addToken(QStringList tokens);
+    int current_token_index() const;
     void resetTokens();
+    void loadDialect(const QString &filename);
 
-    static Lexer *_instance;
-    QString _source;
-    QList<Token *> _tokens;
-    int _current_token_index = -1;
-    QMap<QString, QStringList> _dictionary;
+    const Token &nextToken();
+    const Token &getCurrentToken();
+    void resetToken();
 
 signals:
     void sourceChanged();
-    void tokenized(int count);
+    void tokenized(int tokenCount);
     void current_token_indexChanged(int index);
     void last_token();
     void token_not_ready();
+
+private:
+    static Lexer *_instance;
+    QString _source;
+    QList<Token *> _tokens;
+    QMap<QString, QStringList> _dictionary;
+    int _current_token_index = -1;
+
+    void tokenize();
+    QString getType(const QString &token);
+    void addToken(const QString &token);
+    void addTokenString(const QString &token);
+    void addToken(const QStringList &tokens);
 };
 
 #endif // LEXER_H

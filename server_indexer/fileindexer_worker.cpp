@@ -34,7 +34,6 @@ void fileindexer_worker::run() {
 
     QDirIterator it(directory, QDirIterator::Subdirectories);
     indexedFiles = 0;
-
     db.transaction();
 
     // Utilisez une mémoire tampon pour stocker les informations actuelles
@@ -47,10 +46,6 @@ void fileindexer_worker::run() {
             qDebug("Info: Stopping indexing");
             break;
         }
-
-//        while (isPaused) {
-//            pauseCondition.wait(&mutex);
-//        }
 
         QString filePath = it.next();
         QFileInfo fileInfo(filePath);
@@ -91,8 +86,6 @@ void fileindexer_worker::handleCommand(Command command) {
         break;
     }
 }
-
-
 
 void fileindexer_worker::setDirectory(const QString &directory) {
     this->directory = directory;
