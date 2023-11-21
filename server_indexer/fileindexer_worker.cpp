@@ -44,6 +44,7 @@ void fileindexer_worker::run() {
         qDebug() << "Info: Indexing file" << it.next();
 
         if (!isRunning) {
+            qDebug("Info: Stopping indexing");
             break;
         }
 
