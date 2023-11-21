@@ -1,28 +1,30 @@
-#include "fileindexer.h"
 #include "fileindexer_worker.h"
+#include "qstandardpaths.h"
+#include "qthread.h"
 
 // Indexes the files in the database.
 fileindexer_worker::fileindexer_worker() {
-    QString connectionName = "indexerConnection";
-    QSqlDatabase db = QSqlDatabase::database(connectionName);
-    int indexedFiles = 0;
     QElapsedTimer timer;
     timer.start();
-
-    isRunning = true;
-    isPaused = false;
-
-//    indexFile("F:\\Program Files", db, indexedFiles);
-
-//    double rate = 0;
-//    double iElapsed = double(timer.elapsed()) / 1000;
-//    if (iElapsed) {
-//        rate = indexedFiles / iElapsed;
-//    }
-//    qDebug() << "Info: Indexing completed in" << iElapsed << "seconds -" << rate << "files/s";
 }
 
-void fileindexer_worker::indexFile(const QString &directory, QSqlDatabase &db, int &indexedFiles) {
+void fileindexer_worker::indexFile(const QString &directory, int &indexedFiles) {
+    QString connectionName = QString("indexerConnection_%1").arg((quintptr)QThread::currentThreadId());
+    QSqlDatabase db = QSqlDatabase::database(connectionName);
+
+    QString appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+
+
+    if (!db.isOpen()) {
+        // Ouverture de la base de données si elle n'est pas déjà ouverte
+        db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
+        db.setDatabaseName(appDataLocation + "/indexerFile.db");
+            if (!db.open()) {
+            qWarning() << "Error: Cannot open database" << db.lastError().text();
+            return;
+        }
+    }
+
     qDebug() << "Info: Indexing started" << directory;
 
     // Préparer la requête une seule fois
@@ -30,9 +32,9 @@ void fileindexer_worker::indexFile(const QString &directory, QSqlDatabase &db, i
     query.prepare(QLatin1String("INSERT OR REPLACE INTO files (filePath, fileSize, fileMTime, fileLastCheck) VALUES (?, ?, ?, ?)"));
 
     QDirIterator it(directory, QDirIterator::Subdirectories);
-    indexedFiles = 0;  // Réinitialise le compteur de fichiers indexés
+    indexedFiles = 0;
 
-    db.transaction();  // Commencez une transaction pour l'insertion
+    db.transaction();
 
     // Utilisez une mémoire tampon pour stocker les informations actuelles
     qint64 currentSecs = QDateTime::currentDateTime().toSecsSinceEpoch();
@@ -64,43 +66,25 @@ void fileindexer_worker::indexFile(const QString &directory, QSqlDatabase &db, i
             indexedFiles++;
         }
     }
-    db.commit();  // Valide la transaction
     qDebug() << "Info: Finished indexing" << indexedFiles << "files";
+
+    db.commit();
+    db.close();
+    QSqlDatabase::removeDatabase(connectionName);
 }
 
 void fileindexer_worker::processCommand(Command command, const QString &directory) {
+    int indexedFiles = 0;
     switch (command) {
     case Start:
         isRunning = true;
-        indexFile(directory);
+        indexFile(directory, indexedFiles);
         break;
     case Stop:
+        qDebug() << "TEST10";
         isRunning = false;
+        break;
+    case Pause:
         break;
     }
 }
-
-
-
-
-// Indexer command (Start/Pause/Stop)
-//void fileindexer_worker::processCommand(Command command, QString directory) {
-//    QString connectionName = "indexerConnection";
-//    QSqlDatabase db = QSqlDatabase::database(connectionName);
-//    int indexedFiles = 0;
-//    switch (command) {
-//    case Start:
-//        // Logique de démarrage
-//        qDebug() << "Info: Starting indexer : " + directory;
-//        isRunning = true;
-//        isPaused = false;
-//        indexFile(directory, db, indexedFiles);
-//        break;
-//    case Pause:
-//        // Logique de pause
-//        break;
-//    case Stop:
-//        // Logique d'arrêt
-//        break;
-//    }
-//}

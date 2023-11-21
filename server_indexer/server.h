@@ -28,7 +28,9 @@ private:
 
 signals:
     void commandReceived(fileindexer_worker::Command command, QString directory = QString());
-
+    void stopSignal(bool stop);
+    void pauseSignal(bool pause);
+    void startSignal(const QString &directory);
 };
 
 #endif // SERVER_H

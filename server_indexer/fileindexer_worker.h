@@ -20,7 +20,8 @@ public:
     fileindexer_worker();
     enum Command { Start, Pause, Stop };
 
-    void indexFile(const QString &directory, QSqlDatabase &db, int &indexedFiles); // Index a file in the database
+
+    void indexFile(const QString &directory, int &indexedFiles); // Index a file in the database
 //    void processCommand(Command command, QString directory); // Start/Pause/Stop
     void processCommand(Command command, const QString &directory);
 
@@ -36,6 +37,8 @@ private:
 signals:
     void startIndexing(const QString &directory);
     void stopIndexing();
+
+public slots:
 };
 
 #endif // FILEINDEXER_WORKER_H

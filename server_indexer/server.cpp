@@ -18,12 +18,10 @@ server::server() {
         qDebug() << "Info : Server started and listening...";
     }
 
-    indexerWorker = new fileindexer_worker(); // Create worker
-    indexerWorker->moveToThread(&workerThread); // Move worker to the thread
-//    connect(&workerThread, &QThread::finished, indexerWorker, &QObject::deleteLater); // Delete worker when thread is finished
-    connect(this, &server::commandReceived, indexerWorker, &fileindexer_worker::processCommand); // Connect signals
-    workerThread.start(); // Start the thread
-
+    indexerWorker = new fileindexer_worker();
+    indexerWorker->moveToThread(&workerThread);
+    connect(this, &server::commandReceived, indexerWorker, &fileindexer_worker::processCommand);
+    workerThread.start();
 }
 
 // Si un nouveau client se connecte
@@ -50,13 +48,11 @@ void server::handleSocketData() {
         directory = data.section(':', 1);
         qDebug() << "START";
         emit commandReceived(fileindexer_worker::Start, directory);
-//        indexerWorker->processCommand(fileindexer_worker::Start, directory);
     }
 
     if (data.startsWith("stop")) {
         qDebug() << "STOP";
         emit commandReceived(fileindexer_worker::Stop);
-//        indexerWorker->processCommand(fileindexer_worker::Stop, directory);
     }
 
 }
