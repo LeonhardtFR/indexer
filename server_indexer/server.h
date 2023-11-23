@@ -13,9 +13,6 @@ class server : public QObject {
 public:
     server();
 
-//    static void create_database();
-//    static QSqlDatabase getDatabaseConnection();
-
 private:
     void newConnection();
     void handleSocketData();
@@ -30,10 +27,7 @@ private:
     QTcpSocket *clientSocket;
 
 signals:
-    void commandReceived(fileindexer_worker::Command command, QString directory = QString());
-    void stopSignal(bool stop);
-    void pauseSignal(bool pause);
-    void startSignal(const QString &directory);
+    void commandReceived(fileindexer_worker::Command command);
 };
 
 #endif // SERVER_H

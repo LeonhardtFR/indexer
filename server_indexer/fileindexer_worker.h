@@ -25,14 +25,10 @@ public:
     void setDirectory(const QString &directory);
     void handleCommand(Command command);
 
-    bool isRunning;
+    bool isRunning; // thread is running
 
 private:
-    void insertFile(QString filePath); // Insert a file in the database
-
-
-    QMutex mutex;
-    QWaitCondition pauseCondition;
+    void insertFile(QString filePath); // insert a file in the database
     bool isPaused;
     QString directory;
 

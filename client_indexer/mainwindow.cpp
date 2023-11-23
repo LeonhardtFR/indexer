@@ -108,7 +108,7 @@ void mainwindow::readServerResponse() {
 
     if (!fileResults.isEmpty()) {
             qDebug() << "fileResults not empty";
-        // Si nous avons des résultats de fichiers, réinitialisons la table et ajoutons les nouveaux résultats.
+        // Si résultats de fichiers, réinitialise la table et ajoute de nouveaux résultats.
         ui->tableWidget_results->setRowCount(0);
         ui->tableWidget_results->setRowCount(fileResults.size());
 
@@ -121,7 +121,7 @@ void mainwindow::readServerResponse() {
             QTableWidgetItem *itemType = new QTableWidgetItem(fileInfo.type);
             QTableWidgetItem *itemSize = new QTableWidgetItem(fileInfo.sizeInMb);
 
-            itemChemin->setData(Qt::UserRole, fileInfo.fullPath); // stocker le chemin complet en tant que donnée
+            itemChemin->setData(Qt::UserRole, fileInfo.fullPath); // stocke chemin complet en tant que donnée
 
             ui->tableWidget_results->setItem(i, 0, itemNom); // Colonne "Nom"
             ui->tableWidget_results->setItem(i, 1, itemChemin); // Colonne "Chemin"
@@ -145,11 +145,18 @@ mainwindow::FileInfo mainwindow::FileInfo::fromPath(const QString& filePath) {
     qint64 sizeInBytes = qFileInfo.size();
 
     double sizeInMb = sizeInBytes / (1024.0 * 1024.0);
-    if (sizeInMb < 0.01) { // Si c'est très petit, affiche en Ko
+    if (sizeInMb < 0.01) { // si taille du fichier est inférieure à 0.01 Mo on convertie taille en kilo-octets
         double sizeInKb = sizeInBytes / 1024.0;
-        info.sizeInMb = QString::number(sizeInKb, 'f', 2) + " Ko";
+        info.sizeInMb = QString::number(sizeInKb, 'f', 2) + " Ko"; // formate la taille en Ko avec deux décimales
     } else {
         info.sizeInMb = QString::number(sizeInMb, 'f', 2) + " Mo";
+    }
+
+    // si le type du fichier est inconnu alors on affiche "Unknown"
+    if (info.type.isEmpty()) {
+        info.type = "UNKNOWN";
+    } else {
+        info.type = info.type.toUpper();
     }
 
     return info;

@@ -58,14 +58,7 @@ private:
         static FileInfo fromPath(const QString& filePath);
     };
 
-    QTableWidgetItem *itemNom = new QTableWidgetItem("NomDuFichier.txt");
-    QTableWidgetItem *itemChemin = new QTableWidgetItem("/chemin/vers/le/fichier");
-    QTableWidgetItem *itemDate = new QTableWidgetItem("01/01/2023");
-    QTableWidgetItem *itemType = new QTableWidgetItem("Fichier Texte");
-    QTableWidgetItem *itemSize = new QTableWidgetItem("1 Ko");
-
     QString get_query();
-//    void readServerResponse();
     void search();
     void set_directory();
     QString get_directory();

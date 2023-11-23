@@ -24,7 +24,7 @@ void fileindexer_worker::run() {
 
     db.transaction();
 
-    // Utilisez une mémoire tampon pour stocker les informations actuelles
+    // utilise une mémoire tampon pour stocker les informations actuelles
     qint64 currentSecs = QDateTime::currentDateTime().toSecsSinceEpoch();
 
     while (it.hasNext()) {
@@ -35,9 +35,6 @@ void fileindexer_worker::run() {
             break;
         }
 
-//        while (isPaused) {
-//            pauseCondition.wait(&mutex);
-//        }
 
         QString filePath = it.next();
         QFileInfo fileInfo(filePath);

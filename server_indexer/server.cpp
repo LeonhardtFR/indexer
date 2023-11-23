@@ -12,6 +12,7 @@ server::server() {
     //    méthode newConnection de l'objet this (qui est une instance de la classe server).
     connect(tcpServer, &QTcpServer::newConnection, this, &server::newConnection);
 
+
     // On écoute sur toutes les adresses IP au PORT '12345'
     if(!tcpServer->listen(QHostAddress::Any, 12345)) {
         qCritical() << "ERROR : Server could not start";
