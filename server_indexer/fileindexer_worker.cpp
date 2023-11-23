@@ -48,9 +48,6 @@ void fileindexer_worker::run() {
             break;
         }
 
-//        while (isPaused) {
-//            pauseCondition.wait(&mutex);
-//        }
 
         QString filePath = it.next();
         QFileInfo fileInfo(filePath);
@@ -97,3 +94,5 @@ void fileindexer_worker::handleCommand(Command command) {
 void fileindexer_worker::setDirectory(const QString &directory) {
     this->directory = directory;
 }
+
+
