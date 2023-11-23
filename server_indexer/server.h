@@ -20,12 +20,14 @@ private:
     void newConnection();
     void handleSocketData();
     void handleSocketError(QAbstractSocket::SocketError error);
-    void searchFile(const QString &query);
+    void handleSearchFiles(const QString &query, QTcpSocket *socket);
+    QStringList searchFiles(const QString &query);
 
-    QTcpServer *tcpServer;
+    QTcpServer *tcpServer=nullptr;
     fileindexer_worker *indexerWorker;
     QThread workerThread;
     QString directory;
+    QTcpSocket *clientSocket;
 
 signals:
     void commandReceived(fileindexer_worker::Command command, QString directory = QString());

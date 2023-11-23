@@ -3,7 +3,13 @@
 
 connect_server::connect_server() {
     get_connection();
+
 }
+
+QTcpSocket* connect_server::getSocket() const {
+    return socket;
+}
+
 
 void connect_server::get_connection() {
     // create a socket
@@ -15,7 +21,8 @@ void connect_server::get_connection() {
     // check if the connection is established
     if(socket->waitForConnected(3000)) {
         qDebug() << "Connected";
-
+    } else {
+        qDebug() << "Not connected";
     }
 }
 

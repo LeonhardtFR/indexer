@@ -59,7 +59,6 @@ void fileindexer_worker::run() {
 
     db.commit();
     db.close();
-//    QSqlDatabase::removeDatabase(connectionName);
 }
 
 void fileindexer_worker::handleCommand(Command command) {

@@ -30,9 +30,11 @@ signals:
     void event_search(QString &query);
 
 
+
 private:
     Ui::mainwindow *ui;
     QMetaObject::Connection connectedConnection;
+    QTcpSocket *socket;
 
     QTableWidget *tableWidget_results;
     QLineEdit *lineEdit_query;
@@ -55,6 +57,7 @@ private:
 
         static FileInfo fromPath(const QString& filePath);
     };
+
     QTableWidgetItem *itemNom = new QTableWidgetItem("NomDuFichier.txt");
     QTableWidgetItem *itemChemin = new QTableWidgetItem("/chemin/vers/le/fichier");
     QTableWidgetItem *itemDate = new QTableWidgetItem("01/01/2023");
@@ -62,12 +65,15 @@ private:
     QTableWidgetItem *itemSize = new QTableWidgetItem("1 Ko");
 
     QString get_query();
+//    void readServerResponse();
     void search();
     void set_directory();
     QString get_directory();
     void start_indexing();
     void stop_indexing();
     connect_server *serverConnection;
+    void readServerResponse();
+
 
 };
 #endif // MAINWINDOW_H

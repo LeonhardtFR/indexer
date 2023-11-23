@@ -43,6 +43,8 @@ void server::handleSocketData() {
     QTcpSocket *clientSocket = qobject_cast<QTcpSocket*>(sender());
     QString data = clientSocket->readAll();
 
+    qDebug() << "Info: Received" << data;
+
     if (data.startsWith("start")) {
         directory = data.section(':', 1);
         indexerWorker->setDirectory(directory);
@@ -55,11 +57,18 @@ void server::handleSocketData() {
 
     if(data.startsWith("search")) {
         QString query = data.section(':', 1);
-        this->searchFile(query); // envoie commande de recherche
+        this->handleSearchFiles(query, clientSocket); // envoie commande de recherche
     }
 }
 
-
+// Gestion de la recherche de fichiers
+void server::handleSearchFiles(const QString &query, QTcpSocket *socket) {
+    QStringList results = searchFiles(query);
+    qDebug() << "Info: Found" << results.size() << "results for" << query;
+    for (const QString &result : results) {
+        socket->write(result.toUtf8() + "\n");
+    }
+}
 
 // Gestion des erreurs
 void server::handleSocketError(QAbstractSocket::SocketError error) {
@@ -69,9 +78,11 @@ void server::handleSocketError(QAbstractSocket::SocketError error) {
     }
 }
 
-// File search
-void server::searchFile(const QString &query) {
+// Recherche de fichiers
+QStringList server::searchFiles(const QString &query) {
     qDebug() << "Info: Searching for" << query;
+
+    QStringList results;
 
     QSqlDatabase db = db_indexer::getDatabaseConnection();
 
@@ -79,15 +90,16 @@ void server::searchFile(const QString &query) {
     q.prepare("SELECT filePath FROM files WHERE filePath LIKE :query");
     q.bindValue(":query", "%" + query + "%");
 
-    if (!q.exec()) {
-        qWarning("Error: Failed to search: %s", qPrintable(q.lastError().text()));
-    }
-
-    while (q.next()) {
-        qDebug() << "Info: Found file" << q.value(0).toString();
+    if (q.exec()) {
+        while (q.next()) {
+            results.append(q.value(0).toString());
+        }
+    } else {
+        qWarning("Error: Failed to search files: %s", qPrintable(q.lastError().text()));
     }
 
     db.close();
+    return results;
 }
 
 
