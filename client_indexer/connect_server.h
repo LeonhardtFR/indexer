@@ -13,6 +13,7 @@ public:
     connect_server();
     void sendStartCommand(const QString &directory);
     void sendStopCommand();
+    void sendSearchCommand(const QString &query);
 
 private:
     QTcpSocket *socket;

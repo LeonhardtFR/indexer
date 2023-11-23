@@ -32,3 +32,10 @@ void connect_server::sendStopCommand() {
         socket->write(QString("stop").toUtf8());
     }
 }
+
+void connect_server::sendSearchCommand(const QString &query) {
+    if (socket->isOpen()) {
+        qDebug() << "sendSearchCommand";
+        socket->write(QString("search:%1").arg(query).toUtf8());
+    }
+}

@@ -1,6 +1,6 @@
 #include "fileindexer_worker.h"
-#include "qstandardpaths.h"
 #include "qthread.h"
+#include "db_indexer.h"
 
 // Indexes the files in the database.
 fileindexer_worker::fileindexer_worker() : isRunning(false) {
@@ -11,20 +11,7 @@ fileindexer_worker::fileindexer_worker() : isRunning(false) {
 void fileindexer_worker::run() {
     int indexedFiles = 0;
 
-    QString connectionName = QString("indexerConnection_%1").arg((quintptr)QThread::currentThreadId());
-    QSqlDatabase db = QSqlDatabase::database(connectionName);
-
-    QString appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-
-    if (!db.isOpen()) {
-        // Ouverture de la base de données si elle n'est pas déjà ouverte
-        db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
-        db.setDatabaseName(appDataLocation + "/indexerFile.db");
-            if (!db.open()) {
-            qWarning() << "Error: Cannot open database" << db.lastError().text();
-            return;
-        }
-    }
+    QSqlDatabase db = db_indexer::getDatabaseConnection();
 
     qDebug() << "Info: Indexing started" << directory;
 
@@ -48,6 +35,9 @@ void fileindexer_worker::run() {
             break;
         }
 
+//        while (isPaused) {
+//            pauseCondition.wait(&mutex);
+//        }
 
         QString filePath = it.next();
         QFileInfo fileInfo(filePath);
@@ -69,7 +59,7 @@ void fileindexer_worker::run() {
 
     db.commit();
     db.close();
-    QSqlDatabase::removeDatabase(connectionName);
+//    QSqlDatabase::removeDatabase(connectionName);
 }
 
 void fileindexer_worker::handleCommand(Command command) {
@@ -90,9 +80,6 @@ void fileindexer_worker::handleCommand(Command command) {
 }
 
 
-
 void fileindexer_worker::setDirectory(const QString &directory) {
     this->directory = directory;
 }
-
-

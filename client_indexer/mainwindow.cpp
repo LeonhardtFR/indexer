@@ -15,6 +15,8 @@ mainwindow::mainwindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::mainwi
     pushButton_pause = ui->pushButton_pause;
     lineEdit_directory = ui->lineEdit_directory;
     progressBar_indexing = ui->progressBar_indexing;
+    pushButton_search = ui->pushButton_search;
+    lineEdit_query = ui->lineEdit_query;
 
     // create a connection with the server
     serverConnection = new connect_server();
@@ -24,15 +26,30 @@ mainwindow::mainwindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::mainwi
     connect(pushButton_browse, &QPushButton::clicked, this, &mainwindow::set_directory); // set directory
     connect(pushButton_start, &QPushButton::clicked, this, &mainwindow::start_indexing);
     connect(pushButton_stopIndexing, &QPushButton::clicked, this, &mainwindow::stop_indexing);
+    connect(pushButton_search, &QPushButton::clicked, this, &mainwindow::search);
 
     connect(this, &mainwindow::event_start, serverConnection, &connect_server::sendStartCommand); // send event to the server for start indexation
     connect(this, &mainwindow::event_stop, serverConnection, &connect_server::sendStopCommand); // send event to the server for stop indexation
-
+    connect(this, &mainwindow::event_search, serverConnection, &connect_server::sendSearchCommand); // send event to the server for search
 }
 
 mainwindow::~mainwindow() {
     delete ui;
 }
+
+
+QString mainwindow::get_query() {
+    return lineEdit_query->text();
+}
+
+void mainwindow::search() {
+    // get query
+    QString query = get_query();
+
+    // send event to the server
+    emit event_search(query);
+}
+
 
 void mainwindow::set_directory() {
     QString directoryPath = QFileDialog::getExistingDirectory(this, "Choisir un dossier", "/", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);

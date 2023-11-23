@@ -1,9 +1,10 @@
 #include "server.h"
+#include "db_indexer.h"
 
 server::server() {
 
     // Initialisation de la DB
-    create_database();
+    db_indexer::create_database();
 
     tcpServer = new QTcpServer(this);
 
@@ -46,8 +47,15 @@ void server::handleSocketData() {
         directory = data.section(':', 1);
         indexerWorker->setDirectory(directory);
         emit commandReceived(fileindexer_worker::Start); // envoie commande de démarrage
-    } else if (data.startsWith("stop")) {
+    }
+
+    if(data.startsWith("stop")) {
         emit commandReceived(fileindexer_worker::Stop); // envoie commande d'arrêt
+    }
+
+    if(data.startsWith("search")) {
+        QString query = data.section(':', 1);
+        this->searchFile(query); // envoie commande de recherche
     }
 }
 
@@ -60,5 +68,27 @@ void server::handleSocketError(QAbstractSocket::SocketError error) {
         qWarning() << "Socket error:" << error << socket->errorString();
     }
 }
+
+// File search
+void server::searchFile(const QString &query) {
+    qDebug() << "Info: Searching for" << query;
+
+    QSqlDatabase db = db_indexer::getDatabaseConnection();
+
+    QSqlQuery q(db);
+    q.prepare("SELECT filePath FROM files WHERE filePath LIKE :query");
+    q.bindValue(":query", "%" + query + "%");
+
+    if (!q.exec()) {
+        qWarning("Error: Failed to search: %s", qPrintable(q.lastError().text()));
+    }
+
+    while (q.next()) {
+        qDebug() << "Info: Found file" << q.value(0).toString();
+    }
+
+    db.close();
+}
+
 
 

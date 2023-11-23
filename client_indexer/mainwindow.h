@@ -27,6 +27,7 @@ public:
 signals:
     void event_start(QString &directory);
     void event_stop();
+    void event_search(QString &query);
 
 
 private:
@@ -60,6 +61,8 @@ private:
     QTableWidgetItem *itemType = new QTableWidgetItem("Fichier Texte");
     QTableWidgetItem *itemSize = new QTableWidgetItem("1 Ko");
 
+    QString get_query();
+    void search();
     void set_directory();
     QString get_directory();
     void start_indexing();

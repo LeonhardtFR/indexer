@@ -12,14 +12,15 @@ class server : public QObject {
 
 public:
     server();
-//    enum Command { Start, Pause, Stop };
 
-    static void create_database();
+//    static void create_database();
+//    static QSqlDatabase getDatabaseConnection();
 
 private:
     void newConnection();
     void handleSocketData();
     void handleSocketError(QAbstractSocket::SocketError error);
+    void searchFile(const QString &query);
 
     QTcpServer *tcpServer;
     fileindexer_worker *indexerWorker;
