@@ -5,11 +5,6 @@
 mainwindow::mainwindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::mainwindow) {
     ui->setupUi(this);
 
-//    socket = new QTcpSocket(this); // create socket
-
-//    socket = serverConnection->getSocket();
-
-
     // set title
     this->setWindowTitle("Indexation de fichiers");
 
@@ -38,8 +33,15 @@ mainwindow::mainwindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::mainwi
     connect(this, &mainwindow::event_stop, serverConnection, &connect_server::sendStopCommand); // send event to the server for stop indexation
     connect(this, &mainwindow::event_search, serverConnection, &connect_server::sendSearchCommand); // send event to the server for search
 
-    connect(socket, &QTcpSocket::readyRead, this, &mainwindow::readServerResponse);
+    connect(socket, &QTcpSocket::readyRead, this, &mainwindow::readServerResponse); // read server response
 
+
+    // double clique sur un fichier pour l'ouvrir
+    connect(ui->tableWidget_results, &QTableWidget::itemDoubleClicked, [this](QTableWidgetItem *item) {
+        int row = item->row();
+        QString fullPath = ui->tableWidget_results->item(row, 1)->data(Qt::UserRole).toString();
+        QDesktopServices::openUrl(QUrl::fromLocalFile(fullPath));
+    });
 
 
 }
