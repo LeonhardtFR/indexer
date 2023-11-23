@@ -1,5 +1,5 @@
 #include "connect_server.h"
-#include "mainwindow.h"
+
 
 connect_server::connect_server() {
     get_connection();
