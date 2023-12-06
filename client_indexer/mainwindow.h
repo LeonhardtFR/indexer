@@ -67,6 +67,8 @@ private:
     connect_server *serverConnection;
     void readServerResponse();
 
+    void openFileFromTable(QTableWidgetItem *item);
+
 
 };
 #endif // MAINWINDOW_H

@@ -24,6 +24,7 @@ public:
 
     void setDirectory(const QString &directory);
     void handleCommand(Command command);
+    int countFilesInDirectory(const QString &directory);
 
     bool isRunning; // thread is running
 
@@ -35,6 +36,8 @@ private:
 signals:
     void startIndexing(const QString &directory);
     void stopIndexing();
+
+    void indexingProgress(int totalFiles, int indexedFiles);
 
 public slots:
 };

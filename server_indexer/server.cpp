@@ -21,13 +21,18 @@ server::server() {
     }
 
     indexerWorker = new fileindexer_worker();
+
     connect(this, &server::commandReceived, indexerWorker, &fileindexer_worker::handleCommand);
+    connect(indexerWorker, &fileindexer_worker::indexingProgress, this, &server::sendIndexingProgress);
+
 }
 
 // Si un nouveau client se connecte
 void server::newConnection() {
     // On récupere le socket client grâce à nextPendingConnection
     QTcpSocket *clientSocket = tcpServer->nextPendingConnection();
+    clientSockets.append(clientSocket);
+
 
     // Lecture des données
     connect(clientSocket, &QTcpSocket::readyRead, this, &server::handleSocketData);
@@ -101,6 +106,28 @@ QStringList server::searchFiles(const QString &query) {
 
     db.close();
     return results;
+}
+
+void server::sendIndexingProgress(int totalFiles, int indexedFiles) {
+        qDebug() << "Info: Sending indexing progress" << indexedFiles << "/" << totalFiles;
+
+    // QString progressData = QString::number(indexedFiles) + "/" + QString::number(totalFiles);
+    // QByteArray dataToSend = progressData.toUtf8() + "\n";
+
+        QString TotalFiles = QString("TOTAL_FILES:") + QString::number(totalFiles);
+        QString ProgressUpdate = QString("PROGRESS_UPDATE:") + QString::number(indexedFiles);
+
+        QByteArray totalFilesData = TotalFiles.toUtf8() + "\n";
+        QByteArray progressUpdateData = ProgressUpdate.toUtf8() + "\n";
+
+        // QByteArray dataToSend = TotalFiles.toUtf8() + "\n" + ProgressUpdate.toUtf8() + "\n";
+
+    // Envoyer les données à tous les clients connectés
+    for(QTcpSocket* socket : clientSockets) {
+        socket->write(totalFilesData);
+        socket->write(progressUpdateData);
+        socket->flush();
+    }
 }
 
 

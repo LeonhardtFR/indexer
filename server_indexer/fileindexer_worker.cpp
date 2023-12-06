@@ -9,6 +9,12 @@ fileindexer_worker::fileindexer_worker() : isRunning(false) {
 }
 
 void fileindexer_worker::run() {
+    int totalFiles = countFilesInDirectory(directory);
+    qDebug() << "Total files : " << totalFiles;
+
+
+
+
     int indexedFiles = 0;
 
     QSqlDatabase db = db_indexer::getDatabaseConnection();
@@ -20,6 +26,7 @@ void fileindexer_worker::run() {
     query.prepare(QLatin1String("INSERT OR REPLACE INTO files (filePath, fileSize, fileMTime, fileLastCheck) VALUES (?, ?, ?, ?)"));
 
     QDirIterator it(directory, QDirIterator::Subdirectories);
+
     indexedFiles = 0;
 
     db.transaction();
@@ -28,7 +35,10 @@ void fileindexer_worker::run() {
     qint64 currentSecs = QDateTime::currentDateTime().toSecsSinceEpoch();
 
     while (it.hasNext()) {
-        qDebug() << "Info: Indexing file" << it.next();
+        QString filePath = it.next();
+        QFileInfo fileInfo(filePath);
+
+        qDebug() << "Info: Indexing file";
 
         if (!isRunning) {
             qDebug("Info: Stopping indexing");
@@ -36,8 +46,7 @@ void fileindexer_worker::run() {
         }
 
 
-        QString filePath = it.next();
-        QFileInfo fileInfo(filePath);
+
 
         if (fileInfo.isFile()) {
             query.addBindValue(fileInfo.absoluteFilePath());
@@ -50,6 +59,7 @@ void fileindexer_worker::run() {
             }
 
             indexedFiles++;
+            emit indexingProgress(totalFiles, indexedFiles); // émettre le signal de progression
         }
     }
     qDebug() << "Info: Finished indexing" << indexedFiles << "files";
@@ -57,6 +67,18 @@ void fileindexer_worker::run() {
     db.commit();
     db.close();
 }
+
+// Counts the number of files in a directory.
+int fileindexer_worker::countFilesInDirectory(const QString &directory) {
+    int fileCount = 0;
+    QDirIterator it(directory, QDir::Files, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        it.next();
+        fileCount++;
+    }
+    return fileCount;
+}
+
 
 void fileindexer_worker::handleCommand(Command command) {
     switch (command) {
@@ -79,3 +101,5 @@ void fileindexer_worker::handleCommand(Command command) {
 void fileindexer_worker::setDirectory(const QString &directory) {
     this->directory = directory;
 }
+
+

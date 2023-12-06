@@ -36,18 +36,22 @@ mainwindow::mainwindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::mainwi
     connect(socket, &QTcpSocket::readyRead, this, &mainwindow::readServerResponse); // read server response
 
 
-    // double clique sur un fichier pour l'ouvrir
-    connect(ui->tableWidget_results, &QTableWidget::itemDoubleClicked, [this](QTableWidgetItem *item) {
-        int row = item->row();
-        QString fullPath = ui->tableWidget_results->item(row, 1)->data(Qt::UserRole).toString();
-        QDesktopServices::openUrl(QUrl::fromLocalFile(fullPath));
-    });
+    // double clic sur un fichier pour l'ouvrir
+    connect(ui->tableWidget_results, &QTableWidget::itemDoubleClicked, this, &mainwindow::openFileFromTable);
+
 
 
 }
 
 mainwindow::~mainwindow() {
     delete ui;
+}
+
+// double clic sur un fichier pour l'ouvrir
+void mainwindow::openFileFromTable(QTableWidgetItem *item) {
+    int row = item->row();
+    QString fullPath = ui->tableWidget_results->item(row, 1)->data(Qt::UserRole).toString();
+    QDesktopServices::openUrl(QUrl::fromLocalFile(fullPath));
 }
 
 
@@ -91,20 +95,50 @@ void mainwindow::stop_indexing() {
 }
 
 
-
 void mainwindow::readServerResponse() {
-    qDebug() << "readServerResponse()";
     QByteArray data = socket->readAll();
     QStringList messages = QString(data).split("\n", Qt::SkipEmptyParts);
 
     QList<FileInfo> fileResults;
 
-    qDebug() << "messages.size() : " << messages.size();
+    // reponse séparer en 2 par "/", 1ere partie fichier traité, 2eme partie nombre de fichier total
+    // QString response = messages[0];
+    // QStringList responseList = response.split("/", Qt::SkipEmptyParts);
+    // QString totalFiles = responseList[1];
+    // QString fileProcessed = responseList[0];
+
+    // qDebug() << "totalFiles : " << totalFiles.toInt();
+
+
+
+    // ui->progressBar_indexing->setMaximum(totalFiles.toInt());
+    // ui->progressBar_indexing->setValue(fileProcessed.toInt());
 
     for (const QString &response : messages) {
+        if (response.startsWith("TOTAL_FILES:")) {
+            int totalFiles = response.mid(QString("TOTAL_FILES:").length()).toInt();
+            ui->progressBar_indexing->setMaximum(totalFiles);
+            ui->progressBar_indexing->setValue(0);
+        } else if (response.startsWith("PROGRESS_UPDATE:")) {
+            int progress = response.mid(QString("PROGRESS_UPDATE:").length()).toInt();
+            ui->progressBar_indexing->setValue(progress);
+        } else {
+            // Supposons que tout ce qui ne commence pas par TOTAL_FILES ou PROGRESS_UPDATE est un chemin de fichier.
             FileInfo fileInfo = FileInfo::fromPath(response);
             fileResults.append(fileInfo);
+        }
     }
+
+
+
+
+
+    qDebug() << "messages.size() : " << messages.size();
+
+    // for (const QString &response : messages) {
+    //         FileInfo fileInfo = FileInfo::fromPath(response);
+    //         fileResults.append(fileInfo);
+    // }
 
     if (!fileResults.isEmpty()) {
             qDebug() << "fileResults not empty";
@@ -161,4 +195,5 @@ mainwindow::FileInfo mainwindow::FileInfo::fromPath(const QString& filePath) {
 
     return info;
 }
+
 
