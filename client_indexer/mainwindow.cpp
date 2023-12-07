@@ -101,68 +101,68 @@ void mainwindow::readServerResponse() {
 
     QList<FileInfo> fileResults;
 
-    // reponse séparer en 2 par "/", 1ere partie fichier traité, 2eme partie nombre de fichier total
-    // QString response = messages[0];
-    // QStringList responseList = response.split("/", Qt::SkipEmptyParts);
-    // QString totalFiles = responseList[1];
-    // QString fileProcessed = responseList[0];
-
-    // qDebug() << "totalFiles : " << totalFiles.toInt();
-
-
-
-    // ui->progressBar_indexing->setMaximum(totalFiles.toInt());
-    // ui->progressBar_indexing->setValue(fileProcessed.toInt());
-
     for (const QString &response : messages) {
         if (response.startsWith("TOTAL_FILES:")) {
-            int totalFiles = response.mid(QString("TOTAL_FILES:").length()).toInt();
-            ui->progressBar_indexing->setMaximum(totalFiles);
-            ui->progressBar_indexing->setValue(0);
+            handleTotalFilesUpdate(response);
         } else if (response.startsWith("PROGRESS_UPDATE:")) {
-            int progress = response.mid(QString("PROGRESS_UPDATE:").length()).toInt();
-            ui->progressBar_indexing->setValue(progress);
+            handleProgressUpdate(response);
         } else {
-            // Supposons que tout ce qui ne commence pas par TOTAL_FILES ou PROGRESS_UPDATE est un chemin de fichier.
             FileInfo fileInfo = FileInfo::fromPath(response);
             fileResults.append(fileInfo);
         }
     }
 
-
-
-
-
-    qDebug() << "messages.size() : " << messages.size();
-
-    // for (const QString &response : messages) {
-    //         FileInfo fileInfo = FileInfo::fromPath(response);
-    //         fileResults.append(fileInfo);
-    // }
-
     if (!fileResults.isEmpty()) {
-            qDebug() << "fileResults not empty";
-        // Si résultats de fichiers, réinitialise la table et ajoute de nouveaux résultats.
-        ui->tableWidget_results->setRowCount(0);
-        ui->tableWidget_results->setRowCount(fileResults.size());
+        updateFileResultsTable(fileResults);
+    }
+}
 
-        for (int i = 0; i < fileResults.size(); ++i) {
-            qDebug() << fileResults[i].name;
-            const FileInfo &fileInfo = fileResults[i];
-            QTableWidgetItem *itemNom = new QTableWidgetItem(fileInfo.name);
-            QTableWidgetItem *itemChemin = new QTableWidgetItem(fileInfo.parentDir);
-            QTableWidgetItem *itemDate = new QTableWidgetItem(fileInfo.date);
-            QTableWidgetItem *itemType = new QTableWidgetItem(fileInfo.type);
-            QTableWidgetItem *itemSize = new QTableWidgetItem(fileInfo.sizeInMb);
+void mainwindow::handleProgressUpdate(const QString &message) {
+    bool ok;
+    int progress = message.mid(QString("PROGRESS_UPDATE:").length()).toInt(&ok);
+    if (ok) {
+        ui->progressBar_indexing->setValue(progress);
+    } else {
+        // Gérer l'erreur de conversion
 
-            itemChemin->setData(Qt::UserRole, fileInfo.fullPath); // stocke chemin complet en tant que donnée
+    }
+}
 
-            ui->tableWidget_results->setItem(i, 0, itemNom); // Colonne "Nom"
-            ui->tableWidget_results->setItem(i, 1, itemChemin); // Colonne "Chemin"
-            ui->tableWidget_results->setItem(i, 2, itemDate);
-            ui->tableWidget_results->setItem(i, 3, itemType);
-            ui->tableWidget_results->setItem(i, 4, itemSize);
-        }
+void mainwindow::handleTotalFilesUpdate(const QString& message) {
+    bool ok;
+    int totalFiles = message.mid(QString("TOTAL_FILES:").length()).toInt(&ok);
+    if (ok && totalFiles != totalFilesCount) { // Vérifier si le total a changé
+        totalFilesCount = totalFiles;
+        ui->progressBar_indexing->setMaximum(totalFiles);
+        ui->progressBar_indexing->setValue(0);
+    } else {
+        // Gérer l'erreur de conversion ou le cas où le total n'a pas changé
+    }
+}
+
+void mainwindow::updateFileResultsTable(const QList<FileInfo> &fileResults) {
+    ui->tableWidget_results->clearContents();
+    ui->tableWidget_results->setRowCount(0);
+    ui->tableWidget_results->setRowCount(fileResults.size());
+
+    for (int i = 0; i < fileResults.size(); ++i) {
+        const FileInfo &fileInfo = fileResults[i];
+
+        QTableWidgetItem *nameItem = new QTableWidgetItem(fileInfo.name);
+        nameItem->setData(Qt::UserRole, fileInfo.fullPath);
+        ui->tableWidget_results->setItem(i, 0, nameItem);
+
+        QTableWidgetItem *parentDirItem = new QTableWidgetItem(fileInfo.parentDir);
+        ui->tableWidget_results->setItem(i, 1, parentDirItem);
+
+        QTableWidgetItem *dateItem = new QTableWidgetItem(fileInfo.date);
+        ui->tableWidget_results->setItem(i, 2, dateItem);
+
+        QTableWidgetItem *typeItem = new QTableWidgetItem(fileInfo.type);
+        ui->tableWidget_results->setItem(i, 3, typeItem);
+
+        QTableWidgetItem *sizeItem = new QTableWidgetItem(fileInfo.sizeInMb);
+        ui->tableWidget_results->setItem(i, 4, sizeItem);
     }
 }
 

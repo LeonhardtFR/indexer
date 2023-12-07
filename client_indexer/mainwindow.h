@@ -35,6 +35,7 @@ private:
     Ui::mainwindow *ui;
     QMetaObject::Connection connectedConnection;
     QTcpSocket *socket;
+    int totalFilesCount = -1;
 
     QTableWidget *tableWidget_results;
     QLineEdit *lineEdit_query;
@@ -65,7 +66,11 @@ private:
     void start_indexing();
     void stop_indexing();
     connect_server *serverConnection;
+
     void readServerResponse();
+    void handleProgressUpdate(const QString &message);
+    void handleTotalFilesUpdate(const QString &message);
+    void updateFileResultsTable(const QList<FileInfo> &fileResults);
 
     void openFileFromTable(QTableWidgetItem *item);
 
