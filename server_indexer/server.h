@@ -12,25 +12,23 @@ class server : public QObject {
 
 public:
     server();
-//    enum Command { Start, Pause, Stop };
-
-    static void create_database();
 
 private:
     void newConnection();
     void handleSocketData();
     void handleSocketError(QAbstractSocket::SocketError error);
+    void handleSearchFiles(const QString &query, QTcpSocket *socket);
+    QStringList searchFiles(const QString &query);
+    void sendIndexingProgress(int totalFiles, int indexedFiles);
 
-    QTcpServer *tcpServer;
+    QTcpServer *tcpServer=nullptr;
     fileindexer_worker *indexerWorker;
     QThread workerThread;
     QString directory;
+    QList<QTcpSocket*> clientSockets; // Liste des clients connectés
 
 signals:
-    void commandReceived(fileindexer_worker::Command command, QString directory = QString());
-    void stopSignal(bool stop);
-    void pauseSignal(bool pause);
-    void startSignal(const QString &directory);
+    void commandReceived(fileindexer_worker::Command command);
 };
 
 #endif // SERVER_H

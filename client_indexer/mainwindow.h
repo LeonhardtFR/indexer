@@ -27,11 +27,15 @@ public:
 signals:
     void event_start(QString &directory);
     void event_stop();
+    void event_search(QString &query);
+
 
 
 private:
     Ui::mainwindow *ui;
     QMetaObject::Connection connectedConnection;
+    QTcpSocket *socket;
+    int totalFilesCount = -1;
 
     QTableWidget *tableWidget_results;
     QLineEdit *lineEdit_query;
@@ -54,17 +58,22 @@ private:
 
         static FileInfo fromPath(const QString& filePath);
     };
-    QTableWidgetItem *itemNom = new QTableWidgetItem("NomDuFichier.txt");
-    QTableWidgetItem *itemChemin = new QTableWidgetItem("/chemin/vers/le/fichier");
-    QTableWidgetItem *itemDate = new QTableWidgetItem("01/01/2023");
-    QTableWidgetItem *itemType = new QTableWidgetItem("Fichier Texte");
-    QTableWidgetItem *itemSize = new QTableWidgetItem("1 Ko");
 
+    QString get_query();
+    void search();
     void set_directory();
     QString get_directory();
     void start_indexing();
     void stop_indexing();
     connect_server *serverConnection;
+
+    void readServerResponse();
+    void handleProgressUpdate(const QString &message);
+    void handleTotalFilesUpdate(const QString &message);
+    void updateFileResultsTable(const QList<FileInfo> &fileResults);
+
+    void openFileFromTable(QTableWidgetItem *item);
+
 
 };
 #endif // MAINWINDOW_H

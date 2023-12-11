@@ -20,6 +20,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    db_indexer.h \
     fileindexer_worker.h \
     server.h
 

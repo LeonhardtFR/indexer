@@ -1,6 +1,6 @@
 #include "fileindexer_worker.h"
-#include "qstandardpaths.h"
 #include "qthread.h"
+#include "db_indexer.h"
 
 // Indexes the files in the database.
 fileindexer_worker::fileindexer_worker() : isRunning(false) {
@@ -9,22 +9,15 @@ fileindexer_worker::fileindexer_worker() : isRunning(false) {
 }
 
 void fileindexer_worker::run() {
+    int totalFiles = countFilesInDirectory(directory);
+    qDebug() << "Total files : " << totalFiles;
+
+
+
+
     int indexedFiles = 0;
 
-    QString connectionName = QString("indexerConnection_%1").arg((quintptr)QThread::currentThreadId());
-    QSqlDatabase db = QSqlDatabase::database(connectionName);
-
-    QString appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-
-    if (!db.isOpen()) {
-        // Ouverture de la base de données si elle n'est pas déjà ouverte
-        db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
-        db.setDatabaseName(appDataLocation + "/indexerFile.db");
-            if (!db.open()) {
-            qWarning() << "Error: Cannot open database" << db.lastError().text();
-            return;
-        }
-    }
+    QSqlDatabase db = db_indexer::getDatabaseConnection();
 
     qDebug() << "Info: Indexing started" << directory;
 
@@ -33,22 +26,27 @@ void fileindexer_worker::run() {
     query.prepare(QLatin1String("INSERT OR REPLACE INTO files (filePath, fileSize, fileMTime, fileLastCheck) VALUES (?, ?, ?, ?)"));
 
     QDirIterator it(directory, QDirIterator::Subdirectories);
+
     indexedFiles = 0;
+
     db.transaction();
 
-    // Utilisez une mémoire tampon pour stocker les informations actuelles
+    // utilise une mémoire tampon pour stocker les informations actuelles
     qint64 currentSecs = QDateTime::currentDateTime().toSecsSinceEpoch();
 
     while (it.hasNext()) {
-        qDebug() << "Info: Indexing file" << it.next();
+        QString filePath = it.next();
+        QFileInfo fileInfo(filePath);
+
+        qDebug() << "Info: Indexing file";
 
         if (!isRunning) {
             qDebug("Info: Stopping indexing");
             break;
         }
 
-        QString filePath = it.next();
-        QFileInfo fileInfo(filePath);
+
+
 
         if (fileInfo.isFile()) {
             query.addBindValue(fileInfo.absoluteFilePath());
@@ -61,14 +59,26 @@ void fileindexer_worker::run() {
             }
 
             indexedFiles++;
+            emit indexingProgress(totalFiles, indexedFiles); // émettre le signal de progression
         }
     }
     qDebug() << "Info: Finished indexing" << indexedFiles << "files";
 
     db.commit();
     db.close();
-    QSqlDatabase::removeDatabase(connectionName);
 }
+
+// Counts the number of files in a directory.
+int fileindexer_worker::countFilesInDirectory(const QString &directory) {
+    int fileCount = 0;
+    QDirIterator it(directory, QDir::Files, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        it.next();
+        fileCount++;
+    }
+    return fileCount;
+}
+
 
 void fileindexer_worker::handleCommand(Command command) {
     switch (command) {
@@ -87,6 +97,9 @@ void fileindexer_worker::handleCommand(Command command) {
     }
 }
 
+
 void fileindexer_worker::setDirectory(const QString &directory) {
     this->directory = directory;
 }
+
+
