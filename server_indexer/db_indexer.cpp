@@ -1,11 +1,12 @@
-#include <server.h>
+#include <db_indexer.h>
 #include "QSqlDatabase"
 #include "QSqlQuery"
 #include "QSqlError"
 #include "QStandardPaths"
 #include "QDir"
+#include "qthread.h"
 
-void server::create_database() {
+void db_indexer::create_database() {
     qDebug() << "Info: Initializing the database...";
 
     QString connectionName = "indexerConnection";
@@ -50,13 +51,6 @@ void server::create_database() {
         return;
     }
 
-    for (int i = 0; i <= 10; i++) {
-        if (!query.exec(QString("INSERT INTO files (filePath, fileSize, fileMTime, fileLastCheck) VALUES('file%1',%1,%1,%1)").arg(i))) {
-            qFatal() << "Error: " << query.lastError().text();
-            return;
-        }
-    }
-
     if (query.exec("SELECT * FROM files")) {
         while (query.next()) {
             qDebug() << query.value("id").toUInt() << query.value("filePath").toString()
@@ -68,20 +62,21 @@ void server::create_database() {
         return;
     }
 
-    if (!query.exec("UPDATE files SET filePath='TESTME' WHERE id=1")) {
-        qFatal() << "Error: " << query.lastError().text();
-        return;
-    }
-
-    if (query.exec("SELECT * FROM files WHERE id=1")) {
-        while (query.next()) {
-            QString filePath = query.value("filePath").toString();
-            qDebug() << filePath;
-            qDebug() << (filePath == "TESTME" ? "UPDATE SUCCESS" : "UPDATE FAILS");
-        }
-    } else {
-        qFatal() << "Error: " << query.lastError().text();
-        return;
-    }
     qDebug() << "Info: Database initialized successfully";
 }
+
+QSqlDatabase db_indexer::getDatabaseConnection() {
+    QString connectionName = QString("indexerConnection_%1").arg((quintptr)QThread::currentThreadId());
+    if (!QSqlDatabase::contains(connectionName)) {
+        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
+        QString appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        db.setDatabaseName(appDataLocation + "/indexerFile.db");
+        if (!db.open()) {
+            qWarning() << "Error: Cannot open database" << db.lastError().text();
+            throw std::runtime_error("Database connection failed");
+        }
+        return db;
+    }
+    return QSqlDatabase::database(connectionName);
+}
+
