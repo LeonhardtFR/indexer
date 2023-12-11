@@ -1,3 +1,4 @@
+
 #include "lexer.h"
 #include "token.h"
 
@@ -8,15 +9,16 @@
 #include <QJsonObject>
 #include <QRegularExpression>
 
-
+QDebug operator<<(QDebug debug, const Token &token) {
+    QDebugStateSaver saver(debug);
+    qDebug() << "** Token **";
+    return debug.space();
+}
 
 QDebug operator<<(QDebug debug, const Lexer &lexer) {
     QDebugStateSaver saver(debug);
     qDebug() << "** LEXER **";
     foreach (auto token, lexer.tokens()) { qDebug() << *token; }
-
-
-
     return debug;
 }
 
@@ -24,12 +26,14 @@ QDebug operator<<(QDebug debug, const Lexer &lexer) {
 
 Lexer *Lexer::_instance = new Lexer();
 
-
-
+// region constructor
 
 Lexer::Lexer(QObject *parent) : QObject{parent} {
 }
 
+Token::Token(const QString &value, QString type) {}
+
+// endregion constructor
 
 
 const QString &Lexer::source() const {
@@ -52,46 +56,19 @@ const QList<Token *> &Lexer::tokens() const {
     return _tokens;
 }
 
-// signals
 
-void Lexer::current_token_indexChanged(int index) {
-    // Implémentez le comportement nécessaire ici
-    // ...
-}
 
-void Lexer::sourceChanged() {
-    // Implémentez le comportement nécessaire ici
-    // ...
-}
-
-void Lexer::tokenized(int count) {
-    // Implémentez le comportement nécessaire ici
-    // ...
-}
-
-void Lexer::last_token() {
-    // Implémentez le comportement nécessaire ici
-    // ...
-}
-
-void Lexer::token_not_ready() {
-    // Implémentez le comportement nécessaire ici
-    // ...
-}
-
-// endregion signals
-/*
-void Lexer::setTokens(const QStringList &newTokens) {
+void Lexer::setTokens(QList<Token *>newTokens) {
     if (_tokens == newTokens)
         return;
     _tokens = newTokens;
     emit tokensChanged();
-}*/
+}
 
 
 
 void Lexer::resetTokens() {
-    // setTokens({}); // TODO: Adapt to use your actual default value
+     setTokens({}); // TODO: Adapt to use your actual default value
     _tokens.clear();
 }
 
@@ -118,21 +95,12 @@ void Lexer::tokenize() {
     static QRegularExpression re_replaceComments("#.+\\n");
     _source.replace(re_simpleSpaces, "\n");
 
-
-
-
     QString cmd = _source;
-
-
 
     bool inside = false;
 
-
-
     QStringList tmpList = cmd.split(re_splitQuotes);
-    // qDebug() << tmpList;
-
-
+    qDebug() << tmpList;
 
     foreach (QString s, tmpList) {
         if (s.isEmpty())
@@ -153,18 +121,12 @@ void Lexer::tokenize() {
         inside = !inside;
     }
 
-
-
     emit tokenized(_tokens.count());
 }
-
-
-
 
 Lexer *Lexer::instance() {
     return _instance;
 }
-
 
 
 const Token &Lexer::nextToken() {
@@ -172,12 +134,9 @@ const Token &Lexer::nextToken() {
     if (_current_token_index < _tokens.count() - 1) {
         _current_token_index++;
         emit current_token_indexChanged(_current_token_index);
-
-
-
     } else {
         emit last_token();
-        return *new Token("", "TOKEN_FINISH");
+        return *new Token("", QStringLiteral("TOKEN_FINISH"));
     }
     return *_tokens.at(_current_token_index);
 }
@@ -198,17 +157,12 @@ const Token &Lexer::getCurrentToken() {
         // ret = new Token("", TOKEN_NONE);
         // ret = _tokens.at(_current_token_index);
     }
-
-
-
     return *_tokens.at(_current_token_index);
 }
 
 
-
-
 QString Lexer::getType(QString token) {
-    // qDebug() << __FUNCTION__ << token << _dictionary.keys();
+    qDebug() << __FUNCTION__ << token << _dictionary.keys();
 
 
 
@@ -219,7 +173,7 @@ QString Lexer::getType(QString token) {
             return category;
         }
     }
-    // qDebug() << __FUNCTION__ << token << TOKEN_UNKNOWN;
+    qDebug() << __FUNCTION__ << token << TOKEN_UNKNOWN;
     static QRegularExpression re;
 
 
@@ -295,7 +249,7 @@ void Lexer::addToken(QStringList tokens) {
 
 
 void Lexer::loadDialect(QString filename) {
-    qDebug() << __FUNCTION__;
+    //qDebug() << __FUNCTION__;
     // load the file
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -313,7 +267,7 @@ void Lexer::loadDialect(QString filename) {
     //        qDebug() << "Parse failed";
     //    }
     if (jsonError.error != QJsonParseError::NoError) {
-        qDebug() << QString("Error while parsing dialect (%1): %2").arg(filename, jsonError.errorString());
+        //qDebug() << QString("Error while parsing dialect (%1): %2").arg(filename, jsonError.errorString());
         return;
     }
 
@@ -330,6 +284,6 @@ void Lexer::loadDialect(QString filename) {
             }
         }
     }
-    qDebug() << _dictionary;
-    qDebug() << __FUNCTION__ << "done";
+    //qDebug() << _dictionary;
+    //qDebug() << __FUNCTION__ << "done";
 }

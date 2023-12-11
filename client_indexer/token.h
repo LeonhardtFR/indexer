@@ -12,6 +12,8 @@ class Token {
 public:
     Token(const QString &value, QString type);
 
+    friend QDebug operator<<(QDebug debug, const Token &token);
+
     const QString &value() const;
     TokenType type() const;
 
@@ -19,7 +21,5 @@ private:
     QString _value;
     TokenType _type;
 };
-
-QDebug operator<<(QDebug debug, const Token &token);
 
 #endif // TOKEN_H

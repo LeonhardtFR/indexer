@@ -32,6 +32,7 @@ public:
 
 signals:
     void sourceChanged();
+    void tokensChanged();
     void tokenized(int count);
     void current_token_indexChanged(int index);
     void last_token();
@@ -51,6 +52,7 @@ private:
     QRegularExpression re_replaceComments;
 
     void resetTokens();
+    void setTokens(QList<Token *> newTokens);
     void tokenize();
     QString getType(QString token);
     void addToken(QString token);
