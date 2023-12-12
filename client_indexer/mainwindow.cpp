@@ -50,7 +50,8 @@ void mainwindow::initializeConnections() {
 // double clic sur un fichier pour l'ouvrir
 void mainwindow::openFileFromTable(QTableWidgetItem *item) {
     int row = item->row();
-    QString fullPath = ui->tableWidget_results->item(row, 1)->data(Qt::UserRole).toString();
+    QTableWidgetItem *nameItem = ui->tableWidget_results->item(row, 0);
+    QString fullPath = nameItem->data(Qt::UserRole).toString();
     QDesktopServices::openUrl(QUrl::fromLocalFile(fullPath));
 }
 
