@@ -11,7 +11,7 @@ server::server() {
 
     Lexer Lexer;
 
-    tcpServer = new QTcpServer(this);
+    tcpServer = new QTcpServer(this); // Création du serveur
 
     //    Lorsque l'objet tcpServer émet le signal newConnection, appelle la
     //    méthode newConnection de l'objet this (qui est une instance de la classe server).
@@ -25,14 +25,16 @@ server::server() {
         qDebug() << "Info : Server started and listening...";
     }
 
+    // création du thread pour l'indexation
     indexerWorker = new fileindexer_worker();
 
+    // communication entre le serveur et le thread d'indexation
     connect(this, &server::commandReceived, indexerWorker, &fileindexer_worker::handleCommand);
     connect(indexerWorker, &fileindexer_worker::indexingProgress, this, &server::sendIndexingProgress);
 
 }
 
-// Si un nouveau client se connecte
+// Méthode appelée lorsqu'une nouvelle connexion est établie
 void server::newConnection() {
     // On récupere le socket client grâce à nextPendingConnection
     QTcpSocket *clientSocket = tcpServer->nextPendingConnection();
@@ -50,6 +52,7 @@ void server::newConnection() {
 
 }
 
+// Méthode pour gérer les données reçues d'un client
 void server::handleSocketData() {
     QTcpSocket *clientSocket = qobject_cast<QTcpSocket*>(sender());
     QString data = clientSocket->readAll();
@@ -72,7 +75,7 @@ void server::handleSocketData() {
     }
 }
 
-// Gestion de la recherche de fichiers
+// Méthode pour gérer la recherche de fichiers
 void server::handleSearchFiles(const QString &query, QTcpSocket *socket) {
     QStringList results = searchFiles(query);
     lex.tokenize();
@@ -83,7 +86,7 @@ void server::handleSearchFiles(const QString &query, QTcpSocket *socket) {
     }
 }
 
-// Gestion des erreurs
+// Méthode pour gérer les erreurs de socket
 void server::handleSocketError(QAbstractSocket::SocketError error) {
     QTcpSocket *socket = qobject_cast<QTcpSocket*>(sender());
     if (socket) {
@@ -91,7 +94,7 @@ void server::handleSocketError(QAbstractSocket::SocketError error) {
     }
 }
 
-// Recherche de fichiers
+// Méthode pour rechercher des fichiers dans la BD
 QStringList server::searchFiles(const QString &query) {
     qDebug() << "Info: Searching for" << query;
 
@@ -115,6 +118,7 @@ QStringList server::searchFiles(const QString &query) {
     return results;
 }
 
+// Méthode pour envoyer la progression de l'indexation aux clients
 void server::sendIndexingProgress(int totalFiles, int indexedFiles) {
         qDebug() << "Info: Sending indexing progress" << indexedFiles << "/" << totalFiles;
 
