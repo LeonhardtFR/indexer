@@ -67,6 +67,10 @@ private:
     void stop_indexing();
     connect_server *serverConnection;
 
+
+
+    void initializeUIElements();
+    void initializeConnections();
     void readServerResponse();
     void handleProgressUpdate(const QString &message);
     void handleTotalFilesUpdate(const QString &message);

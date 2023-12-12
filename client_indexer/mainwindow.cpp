@@ -4,11 +4,16 @@
 
 mainwindow::mainwindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::mainwindow) {
     ui->setupUi(this);
-
-    // set title
     this->setWindowTitle("Indexation de fichiers");
+    initializeUIElements();
+    initializeConnections();
+}
 
-    // UI elements
+mainwindow::~mainwindow() {
+    delete ui;
+}
+
+void mainwindow::initializeUIElements() {
     pushButton_browse = ui->pushButton_browse;
     pushButton_start = ui->pushButton_startIndexing;
     pushButton_stopIndexing = ui->pushButton_stopIndexing;
@@ -17,7 +22,9 @@ mainwindow::mainwindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::mainwi
     progressBar_indexing = ui->progressBar_indexing;
     pushButton_search = ui->pushButton_search;
     lineEdit_query = ui->lineEdit_query;
+}
 
+void mainwindow::initializeConnections() {
     // create a connection with the server
     serverConnection = new connect_server();
 
@@ -35,22 +42,16 @@ mainwindow::mainwindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::mainwi
 
     connect(socket, &QTcpSocket::readyRead, this, &mainwindow::readServerResponse); // read server response
 
-
     // double clic sur un fichier pour l'ouvrir
     connect(ui->tableWidget_results, &QTableWidget::itemDoubleClicked, this, &mainwindow::openFileFromTable);
 
-
-
-}
-
-mainwindow::~mainwindow() {
-    delete ui;
 }
 
 // double clic sur un fichier pour l'ouvrir
 void mainwindow::openFileFromTable(QTableWidgetItem *item) {
     int row = item->row();
-    QString fullPath = ui->tableWidget_results->item(row, 1)->data(Qt::UserRole).toString();
+    QTableWidgetItem *nameItem = ui->tableWidget_results->item(row, 0);
+    QString fullPath = nameItem->data(Qt::UserRole).toString();
     QDesktopServices::openUrl(QUrl::fromLocalFile(fullPath));
 }
 
