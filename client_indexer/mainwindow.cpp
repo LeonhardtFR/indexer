@@ -8,6 +8,7 @@ mainwindow::mainwindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::mainwi
     this->setWindowTitle("Indexation de fichiers");
     initializeUIElements();
     initializeConnections();
+    keyPressEvent(event);
 }
 
 mainwindow::~mainwindow() {
@@ -23,6 +24,7 @@ void mainwindow::initializeUIElements() {
     progressBar_indexing = ui->progressBar_indexing;
     pushButton_search = ui->pushButton_search;
     lineEdit_query = ui->lineEdit_query;
+    comboBox_filter = ui->comboBox_filter;
 }
 
 void mainwindow::initializeConnections() {
@@ -35,18 +37,60 @@ void mainwindow::initializeConnections() {
     connect(pushButton_browse, &QPushButton::clicked, this, &mainwindow::set_directory); // set directory
     connect(pushButton_start, &QPushButton::clicked, this, &mainwindow::start_indexing);
     connect(pushButton_stopIndexing, &QPushButton::clicked, this, &mainwindow::stop_indexing);
+    connect(pushButton_pause, &QPushButton::clicked, this, &mainwindow::pause_indexing);
     connect(pushButton_search, &QPushButton::clicked, this, &mainwindow::search);
 
     connect(this, &mainwindow::event_start, serverConnection, &connect_server::sendStartCommand); // send event to the server for start indexation
     connect(this, &mainwindow::event_stop, serverConnection, &connect_server::sendStopCommand); // send event to the server for stop indexation
+    connect(this, &mainwindow::event_pause, serverConnection, &connect_server::sendPauseCommand); // send event to the server for pause indexation
     connect(this, &mainwindow::event_search, serverConnection, &connect_server::sendSearchCommand); // send event to the server for search
+
+    connect(comboBox_filter, &QComboBox::currentTextChanged, this, &mainwindow::filterResults);
+
+
 
     connect(socket, &QTcpSocket::readyRead, this, &mainwindow::readServerResponse); // read server response
 
     // double clic sur un fichier pour l'ouvrir
     connect(ui->tableWidget_results, &QTableWidget::itemDoubleClicked, this, &mainwindow::openFileFromTable);
-
 }
+
+// Raccourci clavier pour la recherche (Enter)
+void mainwindow::keyPressEvent(QKeyEvent *event) {
+    if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
+        search();
+    }
+}
+
+// filtres les résultats (Tous les fichiers, Musiques, Vidéos, Images, Textes)
+void mainwindow::filterResults(QString type) {
+    int rowCount = ui->tableWidget_results->rowCount();
+
+    for (int i = 0; i < rowCount; ++i) {
+        QTableWidgetItem *item = ui->tableWidget_results->item(i, 3); // Assuming type is in column 4
+        if (!item) continue;
+
+        QString fileType = item->text().toLower();
+        bool shouldShow = false;
+
+        if (type == "Musiques" && musicExtensions.contains(fileType)) {
+            shouldShow = true;
+        } else if (type == "Images" && imageExtensions.contains(fileType)) {
+            shouldShow = true;
+        } else if (type == "Vidéos" && videoExtensions.contains(fileType)) {
+            shouldShow = true;
+    } else if (type == "Textes" && textExtensions.contains(fileType)) {
+        shouldShow = true;
+    } else if (type == "Tous les fichiers") {
+        shouldShow = true;
+    }
+
+    ui->tableWidget_results->setRowHidden(i, !shouldShow);
+}
+}
+
+
+
 
 // double clic sur un fichier pour l'ouvrir
 void mainwindow::openFileFromTable(QTableWidgetItem *item) {
@@ -84,16 +128,26 @@ void mainwindow::start_indexing() {
     // get directory path
     QString directory = get_directory();
 
+    // si le chemin n'est pas vide
+    if (directory.isEmpty()) {
+        QMessageBox::warning(this, "Erreur", "Veuillez choisir un répertoire !");
+        return;
+    }
+
     // send event to the server
     emit event_start(directory);
 }
 
+// send event to the server for stop indexation
 void mainwindow::stop_indexing() {
-    // get directory path
-    QString directory = get_directory();
-
     // send event to the server
     emit event_stop();
+}
+
+// send event to the server for pause indexation
+void mainwindow::pause_indexing() {
+    // send event to the server
+    emit event_pause();
 }
 
 

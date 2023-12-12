@@ -1,5 +1,4 @@
 #include "fileindexer_worker.h"
-#include "qthread.h"
 #include "db_indexer.h"
 
 // Indexes the files in the database.
@@ -10,40 +9,28 @@ fileindexer_worker::fileindexer_worker() : isRunning(false) {
 
 // Méthode principale pour l'exécution du thread
 void fileindexer_worker::run() {
-    int totalFiles = countFilesInDirectory(directory); // Compte le nombre total de fichiers dans le répertoire donné
-    qDebug() << "Total files : " << totalFiles;
-
-
-    int indexedFiles = 0;
+    int totalFiles = countFilesInDirectory(directory);
+    qDebug() << "Total files: " << totalFiles;
 
     QSqlDatabase db = db_indexer::getDatabaseConnection();
-
-    qDebug() << "Info: Indexing started" << directory;
-
-    // Préparer la requête une seule fois
     QSqlQuery query(db);
     query.prepare(QLatin1String("INSERT OR REPLACE INTO files (filePath, fileSize, fileMTime, fileLastCheck) VALUES (?, ?, ?, ?)"));
 
-    QDirIterator it(directory, QDirIterator::Subdirectories);  // Parcours récursif des fichiers dans le répertoire spécifié
-
-    indexedFiles = 0;
-
+    QDirIterator it(directory, QDirIterator::Subdirectories);
+    int indexedFiles = 0;
+    qint64 currentSecs = QDateTime::currentDateTime().toSecsSinceEpoch();
     db.transaction();
 
-    // utilise une mémoire tampon pour stocker les informations actuelles
-    qint64 currentSecs = QDateTime::currentDateTime().toSecsSinceEpoch();
+    while (isRunning) {
+        mutex.lock(); // verrouillage du mutex pour éviter les conflits d'accès
+        while (isPaused) {
+            pauseCondition.wait(&mutex);
+        }
+        mutex.unlock();
 
-    while (it.hasNext()) {
+        if (!it.hasNext()) break;
         QString filePath = it.next();
         QFileInfo fileInfo(filePath);
-
-        qDebug() << "Info: Indexing file";
-
-        // Arrête l'indexation si le client envoie la commande d'arrêt
-        if (!isRunning) {
-            qDebug("Info: Stopping indexing");
-            break;
-        }
 
         if (fileInfo.isFile()) {
             query.addBindValue(fileInfo.absoluteFilePath());
@@ -52,14 +39,17 @@ void fileindexer_worker::run() {
             query.addBindValue(currentSecs);
 
             if (!query.exec()) {
-                qWarning("Error: Failed to insert file: %s", qPrintable(query.lastError().text()));
+                qWarning() << "Error: Failed to insert file: " << query.lastError().text();
             }
-
             indexedFiles++;
-            emit indexingProgress(totalFiles, indexedFiles); // émettre le signal de progression
+            emit indexingProgress(totalFiles, indexedFiles);
         }
     }
-    qDebug() << "Info: Finished indexing" << indexedFiles << "files";
+
+    // Réinitialisation des états à la fin de l'exécution
+    QMutexLocker locker(&mutex);
+    isRunning = false;
+    isPaused = false;
 
     db.commit();
     db.close();
@@ -78,19 +68,25 @@ int fileindexer_worker::countFilesInDirectory(const QString &directory) {
 
 // Gère les commandes reçues (démarrage, arrêt, pause)
 void fileindexer_worker::handleCommand(Command command) {
+    QMutexLocker locker(&mutex); // verrouillage du mutex pour éviter les conflits d'accès
     switch (command) {
-
     case Start:
-        isRunning = true;
-        this->start(); // démarre thread
+        if (!isRunning) {
+            isRunning = true;
+            isPaused = false;
+            start();
+        }
         break;
-
     case Stop:
-        isRunning = false; // arrêt thread
+        isRunning = false;
+        pauseCondition.wakeAll();
         break;
-
     case Pause:
-        break; // TODO
+        isPaused = !isPaused;
+        if (!isPaused) {
+            pauseCondition.wakeAll();
+        }
+        break;
     }
 }
 
