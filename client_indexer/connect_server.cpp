@@ -40,6 +40,13 @@ void connect_server::sendStopCommand() {
     }
 }
 
+void connect_server::sendPauseCommand() {
+    if (socket->isOpen()) {
+        qDebug() << "sendPauseCommand";
+        socket->write(QString("pause").toUtf8());
+    }
+}
+
 void connect_server::sendSearchCommand(const QString &query) {
     if (socket->isOpen()) {
         qDebug() << "sendSearchCommand";

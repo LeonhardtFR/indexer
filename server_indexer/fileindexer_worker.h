@@ -30,8 +30,11 @@ public:
 
 private:
     void insertFile(QString filePath); // insert a file in the database
-    bool isPaused;
+    bool isPaused; // thread is paused
     QString directory;
+    QMutex mutex;
+    QWaitCondition pauseCondition;
+
 
 signals:
     void startIndexing(const QString &directory);

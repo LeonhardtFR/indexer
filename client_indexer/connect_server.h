@@ -14,6 +14,7 @@ public:
     void sendStartCommand(const QString &directory);
     void sendStopCommand();
     void sendSearchCommand(const QString &query);
+    void sendPauseCommand();
 
     QTcpSocket* getSocket() const;
 

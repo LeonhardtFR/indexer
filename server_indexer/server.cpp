@@ -69,6 +69,10 @@ void server::handleSocketData() {
         emit commandReceived(fileindexer_worker::Stop); // envoie commande d'arrêt
     }
 
+    if(data.startsWith("pause")) {
+        emit commandReceived(fileindexer_worker::Pause); // envoie commande de pause
+    }
+
     if(data.startsWith("search")) {
         QString query = data.section(':', 1);
         this->handleSearchFiles(query, clientSocket); // envoie commande de recherche

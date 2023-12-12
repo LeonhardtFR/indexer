@@ -12,6 +12,8 @@
 #include <QFileDialog>
 #include <QTableWidget>
 #include <QDesktopServices>
+#include <QKeyEvent>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class mainwindow; }
@@ -27,6 +29,7 @@ public:
 signals:
     void event_start(QString &directory);
     void event_stop();
+    void event_pause();
     void event_search(QString &query);
 
 
@@ -48,6 +51,8 @@ private:
     QPushButton *pushButton_pause;
     QProgressBar *progressBar_indexing;
 
+    QKeyEvent *event;
+
     struct FileInfo {
         QString name;
         QString parentDir;
@@ -65,6 +70,8 @@ private:
     QString get_directory();
     void start_indexing();
     void stop_indexing();
+    void pause_indexing();
+
     connect_server *serverConnection;
 
 
@@ -72,6 +79,7 @@ private:
     void initializeUIElements();
     void initializeConnections();
     void readServerResponse();
+    void keyPressEvent(QKeyEvent *event);
     void handleProgressUpdate(const QString &message);
     void handleTotalFilesUpdate(const QString &message);
     void updateFileResultsTable(const QList<FileInfo> &fileResults);
