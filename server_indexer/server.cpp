@@ -1,10 +1,15 @@
 #include "server.h"
+#include "lexer.h"
 #include "db_indexer.h"
+
+Lexer lex;
 
 server::server() {
 
     // Initialisation de la DB
     db_indexer::create_database();
+
+    Lexer Lexer;
 
     tcpServer = new QTcpServer(this);
 
@@ -70,8 +75,10 @@ void server::handleSocketData() {
 // Gestion de la recherche de fichiers
 void server::handleSearchFiles(const QString &query, QTcpSocket *socket) {
     QStringList results = searchFiles(query);
+    lex.tokenize();
     qDebug() << "Info: Found" << results.size() << "results for" << query;
     for (const QString &result : results) {
+
         socket->write(result.toUtf8() + "\n");
     }
 }

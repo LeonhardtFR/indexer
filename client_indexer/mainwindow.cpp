@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "connect_server.h"
 
+
 mainwindow::mainwindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::mainwindow) {
     ui->setupUi(this);
 

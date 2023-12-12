@@ -13,13 +13,11 @@ CONFIG += c++17
 
 SOURCES += \
     connect_server.cpp \
-    lexer.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     connect_server.h \
-    lexer.h \
     mainwindow.h \
     token.h
 
