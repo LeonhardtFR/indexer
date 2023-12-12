@@ -13,7 +13,8 @@ SOURCES += \
         fileindexer_worker.cpp \
         lexer.cpp \
         main.cpp \
-        server.cpp
+        server.cpp \
+        token.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

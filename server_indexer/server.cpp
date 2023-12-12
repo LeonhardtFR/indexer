@@ -78,7 +78,8 @@ void server::handleSocketData() {
 // Méthode pour gérer la recherche de fichiers
 void server::handleSearchFiles(const QString &query, QTcpSocket *socket) {
     QStringList results = searchFiles(query);
-    lex.tokenize();
+    //lex.setSource(query);
+    //lex.tokenize();
     qDebug() << "Info: Found" << results.size() << "results for" << query;
     for (const QString &result : results) {
 

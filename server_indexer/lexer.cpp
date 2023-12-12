@@ -13,7 +13,7 @@
 
 QDebug operator<<(QDebug debug, const Token &token) {
     QDebugStateSaver saver(debug);
-    qDebug() << "** Token **";
+    qDebug() << "** Token **" << token;
     return debug.space();
 }
 
@@ -28,12 +28,10 @@ QDebug operator<<(QDebug debug, const Lexer &lexer) {
 
 Lexer *Lexer::_instance = new Lexer();
 
-// region constructor
+// region Constructor
 
 Lexer::Lexer(QObject *parent) : QObject{parent} {
 }
-
-Token::Token(const QString &value, QString type) {}
 
 // endregion constructor
 
@@ -45,9 +43,14 @@ const QString &Lexer::source() const {
 
 
 void Lexer::setSource(const QString &newSource) {
+    qDebug() << __FUNCTION__;
     if (_source == newSource)
+    {
+        qDebug() << "source is same as newSource";
         return;
+    }
     _source = newSource;
+    qDebug() << _source;
     tokenize();
     emit sourceChanged();
 }
@@ -88,7 +91,10 @@ void Lexer::tokenize() {
     qDebug() << __FUNCTION__;
     resetTokens();
     if (_source.isEmpty())
+    {
+        qDebug() << "source empty";
         return;
+    }
     _source = _source.trimmed();
     static QRegularExpression re_simpleSpaces("(\\n+)");
     static QRegularExpression re_addSpaceAround("([^a-zA-Z0-9._/]{1})");
@@ -110,9 +116,6 @@ void Lexer::tokenize() {
         if (inside) {          // If 's' is inside quotes ...
             addTokenString(s); // ... get the whole string
         } else {               // If 's' is outside quotes ...
-
-
-
             s.replace(re_addSpaceAround, " \\1 ");
             s = s.trimmed();
             // removes comments
@@ -123,6 +126,7 @@ void Lexer::tokenize() {
         inside = !inside;
     }
 
+
     emit tokenized(_tokens.count());
 }
 
@@ -132,7 +136,7 @@ Lexer *Lexer::instance() {
 
 
 const Token &Lexer::nextToken() {
-    // qDebug() << __FUNCTION__ << _current_token_index << _tokens.count();
+    qDebug() << __FUNCTION__ << _current_token_index << _tokens.count();
     if (_current_token_index < _tokens.count() - 1) {
         _current_token_index++;
         emit current_token_indexChanged(_current_token_index);
@@ -153,6 +157,8 @@ void Lexer::resetToken() {
 
 
 const Token &Lexer::getCurrentToken() {
+    std::cout << "getCurrentToken" << std::endl;
+
     // Token *ret = nullptr;
     if (_current_token_index == -1) {
         emit token_not_ready();
@@ -255,8 +261,6 @@ void Lexer::loadDialect(QString filename) {
     qDebug() << dialect;
     file.close();
 
-
-
     // parse json
     QJsonParseError jsonError;
     QJsonDocument   doc = QJsonDocument::fromJson(dialect.toUtf8(), &jsonError);
@@ -264,7 +268,7 @@ void Lexer::loadDialect(QString filename) {
         qDebug() << "Parse failed";
     }
     if (jsonError.error != QJsonParseError::NoError) {
-        //qDebug() << QString("Error while parsing dialect (%1): %2").arg(filename, jsonError.errorString());
+        qDebug() << QString("Error while parsing dialect (%1): %2").arg(filename, jsonError.errorString());
         return;
     }
 
@@ -281,6 +285,7 @@ void Lexer::loadDialect(QString filename) {
             }
         }
     }
+
     qDebug() << _dictionary;
     qDebug() << __FUNCTION__ << "done";
 }
