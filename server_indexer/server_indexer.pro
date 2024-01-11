@@ -11,7 +11,6 @@ CONFIG += c++17 cmdline
 SOURCES += \
         db_indexer.cpp \
         fileindexer_worker.cpp \
-        fsm.cpp \
         lexer.cpp \
         main.cpp \
         server.cpp
@@ -24,7 +23,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     db_indexer.h \
     fileindexer_worker.h \
-    fsm.h \
     lexer.h \
     server.h \
     token.h
