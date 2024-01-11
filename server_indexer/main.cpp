@@ -64,6 +64,7 @@ int main(int argc, char *argv[]) {
         {
             Cmd *command = factory->create("CmdSearch");
             command->parse(olex.tokens());
+            test = true;
         }
     }
 

@@ -42,6 +42,8 @@ public:
 
 class CmdSearch : public TCmdFactory<CmdSearch> {
 
+    QString command;
+
     QString filename;
     QString lastModified;
     QString created;
@@ -55,6 +57,7 @@ class CmdSearch : public TCmdFactory<CmdSearch> {
     CmdSearch();
     // Attributes
 
+    void constructSearchCommand(QString nextCommandParam);
 
     // Implement virtual method
     void parse(QList<Token *> tokens);

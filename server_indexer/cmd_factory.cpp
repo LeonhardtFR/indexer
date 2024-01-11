@@ -56,8 +56,15 @@ void CmdSearch::parse(QList<Token *> tokens) {
 
 }
 
+void CmdSearch::constructSearchCommand(QString nextCommandParam)
+{
+    this->command = this->command + nextCommandParam;
+}
+
 void CmdSearch::run() {
     qDebug() << __FUNCTION__ << "on SEARCH";
+
+    executeCommand(this->command);
 }
 
 /** END CmdSearch **/
