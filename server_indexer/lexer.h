@@ -43,7 +43,7 @@ signals:
 private:
     QString _source;
     QList<Token *> _tokens;
-    int _current_token_index;
+    int _current_token_index = -1;
     static Lexer *_instance;
 
     // Add other private members as needed

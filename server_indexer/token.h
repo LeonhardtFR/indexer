@@ -2,6 +2,7 @@
 #define TOKEN_H
 
 #include <QString>
+#include <QObject>
 
 enum TokenType {
     TOKEN_UNKNOWN,
@@ -10,16 +11,19 @@ enum TokenType {
 
 class Token {
 public:
-    Token(const QString &value, QString type);
+    Token(const QString &text, QString type);
 
     friend QDebug operator<<(QDebug debug, const Token &token);
 
-    const QString &value() const;
-    TokenType type() const;
+    const QString &text() const;
+    //TokenType type() const;
+    const QString type() const;
+    const QList<Token> &getTokens() const;
 
 private:
-    QString _value;
-    TokenType _type;
+    QString _text;
+    QString _type;
+    QList<Token> _tokens;
 };
 
 #endif // TOKEN_H
