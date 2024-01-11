@@ -50,7 +50,6 @@ void Lexer::setSource(const QString &newSource) {
         return;
     }
     _source = newSource;
-    qDebug() << _source;
     tokenize();
     emit sourceChanged();
 }
@@ -108,7 +107,6 @@ void Lexer::tokenize() {
     bool inside = false;
 
     QStringList tmpList = cmd.split(re_splitQuotes);
-    qDebug() << tmpList;
 
     foreach (QString s, tmpList) {
         if (s.isEmpty())
@@ -120,7 +118,7 @@ void Lexer::tokenize() {
             s = s.trimmed();
             // removes comments
             s.replace(re_replaceComments, "");
-            qDebug() << __FUNCTION__ << __LINE__ << s;
+            //qDebug() << __FUNCTION__ << __LINE__ << s;
             addToken(s.split(re_splitSpaces, Qt::SkipEmptyParts)); // ... get the splitted string
         }
         inside = !inside;
@@ -172,11 +170,8 @@ const Token &Lexer::getCurrentToken() {
 QString Lexer::getType(QString token) {
     qDebug() << __FUNCTION__ << token << _dictionary.keys();
 
-    //
     foreach (QString category, _dictionary.keys()) {
-        qDebug() << "Searching in catgory" << category;
         if (_dictionary[category].contains(token.toUpper())) {
-            qDebug() << __FUNCTION__ << token << category;
             return category;
         }
     }
@@ -258,7 +253,6 @@ void Lexer::loadDialect(QString filename) {
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         qWarning() << "Dialect file missing !!";
     QString dialect = file.readAll();
-    qDebug() << dialect;
     file.close();
 
     // parse json
@@ -278,14 +272,9 @@ void Lexer::loadDialect(QString filename) {
     if (doc.isObject()) {
         QJsonObject jsonObj = doc.object();
         foreach (auto topic, jsonObj.keys()) {
-            qDebug() << topic;
             foreach (auto word, jsonObj[topic].toArray().toVariantList()) {
-                qDebug() << word;
                 _dictionary[topic] << word.toString();
             }
         }
     }
-
-    qDebug() << _dictionary;
-    qDebug() << __FUNCTION__ << "done";
 }

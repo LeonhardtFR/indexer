@@ -5,6 +5,7 @@
 #include <QCoreApplication>
 #include <QMap>
 #include <QString>
+#include <token.h>
 
 #define STR_PTR(ptr) QString("0x%1").arg(reinterpret_cast<quintptr>(ptr), QT_POINTER_SIZE * 2, 16, QChar('0'))
 
@@ -16,7 +17,7 @@ public:
         qDebug() << __FUNCTION__;
     }
 
-    virtual void parse(QString secondToken) = 0;
+    virtual void parse(QList<Token *> tokens) = 0;
     virtual void run() = 0;
 
 };
@@ -56,16 +57,14 @@ class CmdSearch : public TCmdFactory<CmdSearch> {
 
 
     // Implement virtual method
-    void parse(QString secondToken);
+    void parse(QList<Token *> tokens);
     void run();
 
 };
 
 // CmdGet : on declare la classe et on lui rajoute une méthode 'myFunc'
 class CmdGet : public TCmdFactory<CmdGet> {
-
     QString folderType;
-
     public:
     CmdGet();
     void get() {
@@ -73,23 +72,34 @@ class CmdGet : public TCmdFactory<CmdGet> {
     }
 
     // Implement virtual method
-    void parse(QString secondToken);
+    void parse(QList<Token *> tokens);
     void run();
-
 };
 
 class CmdAdd: public TCmdFactory<CmdAdd> {
     QString folderType;
-    QString folderName;
+    QString folderPath;
 
     public:
     CmdAdd();
 
     // Implement virtual method
-    void parse(QString secondToken);
+    void parse(QList<Token *> tokens);
     void run();
 };
 
+class CmdClear : public TCmdFactory<CmdClear> {
+    QString folderType;
+public:
+    CmdClear();
+    void get() {
+        qDebug() << __FUNCTION__;
+    }
+
+    // Implement virtual method
+    void parse(QList<Token *> tokens);
+    void run();
+};
 
 class CmdFactory {
     QMap<QString, CreateCmdFn> m_factoryMap;
@@ -124,6 +134,7 @@ class CmdFactory {
         Register("CmdSearch", &CmdSearch::create);
         Register("CmdGet", &CmdGet::create);
         Register("CmdAdd", &CmdAdd::create);
+        Register("CmdClear", &CmdClear::create);
     }
 
     Cmd *create(QString cmdName) {

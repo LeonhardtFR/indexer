@@ -30,14 +30,14 @@ void db_indexer::create_database() {
     }
 
     QSqlQuery dropQuery(db);
-    if (!dropQuery.exec("DROP TABLE IF EXISTS files")) {
+    if (!dropQuery.exec("DROP TABLE IF EXISTS whitelist")) {
         qFatal() << "Error: " << dropQuery.lastError().text();
         return;
     }
 
     QSqlQuery query(db);
 
-    QString tblFileCreate = R"(
+    /*QString tblFileCreate = R"(
         CREATE TABLE IF NOT EXISTS files (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             filePath STRING,
@@ -45,17 +45,28 @@ void db_indexer::create_database() {
             fileMTime BIGINT,
             fileLastCheck BIGINT
         )
+    )";*/
+
+    QString tblFileCreate = R"(
+        CREATE TABLE IF NOT EXISTS whitelist (
+            folderPath TEXT
+        )
     )";
+
     if (!query.exec(tblFileCreate)) {
         qFatal() << "Error: " << query.lastError().text();
         return;
     }
 
-    if (query.exec("SELECT * FROM files")) {
+    /*if (query.exec("SELECT * FROM files")) {
         while (query.next()) {
             qDebug() << query.value("id").toUInt() << query.value("filePath").toString()
                      << query.value("fileSize").toUInt() << query.value("fileMTime").toUInt()
                      << query.value("fileLastCheck").toUInt();
+        }*/
+    if(query.exec("SELECT * FROM whitelist")) {
+        while (query.next()) {
+            qDebug() << query.value("folderPath").toUInt();
         }
     } else {
         qFatal() << "Error: " << query.lastError().text();
