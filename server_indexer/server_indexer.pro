@@ -29,3 +29,6 @@ HEADERS += \
 
 DISTFILES += \
     dialect_file.json
+
+STATECHARTS += \
+    FSM_indexer.scxml
