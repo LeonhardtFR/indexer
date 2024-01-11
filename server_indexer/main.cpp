@@ -18,6 +18,9 @@ int main(int argc, char *argv[]) {
     // changer le chemin
     olex.loadDialect("C:/Users/Sandr/Documents/GitHub/indexer/server_indexer/dico.json");
 
+    // on cree la Factory
+    CmdFactory *factory = new CmdFactory;
+
     // test plusieurs
     while(!test)
     {    // test for search
@@ -36,8 +39,6 @@ int main(int argc, char *argv[]) {
         }
 
         // test factory
-        // on cree la Factory
-        CmdFactory *factory = new CmdFactory;
 
         QString s = olex.tokens()[0]->text();
 

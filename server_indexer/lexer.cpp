@@ -43,7 +43,6 @@ const QString &Lexer::source() const {
 
 
 void Lexer::setSource(const QString &newSource) {
-    qDebug() << __FUNCTION__;
     if (_source == newSource)
     {
         qDebug() << "source is same as newSource";
@@ -76,15 +75,9 @@ void Lexer::resetTokens() {
     _tokens.clear();
 }
 
-
-
-
 int Lexer::current_token_index() const {
     return _current_token_index;
 }
-
-
-
 
 void Lexer::tokenize() {
     qDebug() << __FUNCTION__;
@@ -222,8 +215,6 @@ void Lexer::addToken(QString token) {
         return;
     }
 
-
-
     Token *tokenObj = new Token(token, type);
     _tokens.append(tokenObj);
     lasttype = type;
@@ -239,7 +230,6 @@ void Lexer::addTokenString(QString token) {
 
 
 void Lexer::addToken(QStringList tokens) {
-    qDebug() << tokens;
     foreach (auto token, tokens) { addToken(token); }
 }
 
@@ -265,8 +255,6 @@ void Lexer::loadDialect(QString filename) {
         qDebug() << QString("Error while parsing dialect (%1): %2").arg(filename, jsonError.errorString());
         return;
     }
-
-
 
     // load the json into the qmap
     if (doc.isObject()) {
