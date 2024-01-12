@@ -10,6 +10,8 @@
 
 /** Util class **/
 
+Lexer *Lexer::_instance = new Lexer();
+
 static QString checkAndGetFolderType(Token token)
 {
     if(token.type() == "TYPE_FILES")
@@ -50,16 +52,28 @@ static void executeCommand(QString request)
 
 CmdSearch::CmdSearch() {}
 
-void CmdSearch::parse(QList<Token *> tokens) {
-    qDebug() << __FUNCTION__ << "on SEARCH";
-    // TODO call state chart like this -> stateChart(this)
-
-}
-
 void CmdSearch::constructSearchCommand(QString nextCommandParam)
 {
     this->command = this->command + nextCommandParam;
 }
+
+void CmdSearch::parse(QList<Token *> tokens, Lexer lex) {
+    qDebug() << __FUNCTION__ << "on SEARCH";
+    // TODO call state chart like this -> stateChart(this)
+
+    // second token need to be IDENTIFIER type and match regex
+    if(tokens[1]->type() == "IDENTIFIER")
+    {
+        this->filename = tokens[1]->text();
+    }
+    // third token need to have a type SEARCH-OPTION
+    // here we are going to iterate
+    if(tokens[2]->type() == "SEARCH_OPTION")
+    {
+
+    }
+}
+
 
 void CmdSearch::run() {
     qDebug() << __FUNCTION__ << "on SEARCH";
@@ -73,7 +87,7 @@ void CmdSearch::run() {
 
 CmdGet::CmdGet() {}
 
-void CmdGet::parse(QList<Token *> tokens) {
+void CmdGet::parse(QList<Token *> tokens, Lexer lex) {
     qDebug() << __FUNCTION__ << "on GET" << tokens[1]->text();
 
     // complete the data
@@ -98,12 +112,14 @@ void CmdGet::run() {
 
 CmdAdd::CmdAdd() {}
 
-void CmdAdd::parse(QList<Token *> tokens) {
+void CmdAdd::parse(QList<Token *> tokens, Lexer lex) {
     //qDebug() << __FUNCTION__ << "on ADD";
 
     // complete the data
-    this->folderType = checkAndGetFolderType(*tokens[1]);
-    this->folderPath = tokens[2]->text();
+    this->folderType = checkAndGetFolderType(lex.nextToken());
+    qDebug() << this->folderType << "check";
+    qDebug() << lex.nextToken();
+    this->folderPath = lex.nextToken().text();
 
     // then run
     this->run();
@@ -125,7 +141,7 @@ void CmdAdd::run() {
 
 CmdClear::CmdClear() {}
 
-void CmdClear::parse(QList<Token *> tokens) {
+void CmdClear::parse(QList<Token *> tokens, Lexer lex) {
     qDebug() << __FUNCTION__ << "on CLEAR" << tokens[1]->text();
 
     // complete the data

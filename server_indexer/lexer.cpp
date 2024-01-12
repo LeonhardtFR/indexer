@@ -126,12 +126,13 @@ Lexer *Lexer::instance() {
 }
 
 const Token &Lexer::nextToken() {
-    qDebug() << __FUNCTION__ << _current_token_index << _tokens.count();
-    if (_current_token_index < _tokens.count() - 1) {
+    //qDebug() << __FUNCTION__ << _current_token_index << _tokens.count();
+    if (_current_token_index < _tokens.count() -1) {
         qDebug() << "index ok" << _current_token_index;
         _current_token_index++;
         emit current_token_indexChanged(_current_token_index);
     } else {
+        _current_token_index++;
         emit last_token();
         return *new Token("", QStringLiteral("TOKEN_FINISH"));
     }

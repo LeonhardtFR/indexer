@@ -40,30 +40,31 @@ int main(int argc, char *argv[]) {
 
         // test factory
 
-        QString s = olex.tokens()[0]->text();
 
+        QString s = olex.nextToken().text();
+        qDebug() << s;
         if(s == "ADD")
         {
             Cmd *command = factory->create("CmdAdd");
-            command->parse(olex.tokens());
+            command->parse(olex.tokens(), olex);
             in = false;
         }
         else if(s == "GET")
         {
             Cmd *command = factory->create("CmdGet");
-            command->parse(olex.tokens());
+            command->parse(olex.tokens(), olex);
             test = true;
         }
         else if(s == "CLEAR")
         {
             Cmd *command = factory->create("CmdClear");
-            command->parse(olex.tokens());
+            command->parse(olex.tokens(), olex);
             test = true;
         }
         else if(s == "SEARCH")
         {
             Cmd *command = factory->create("CmdSearch");
-            command->parse(olex.tokens());
+            command->parse(olex.tokens(), olex);
             test = true;
         }
     }

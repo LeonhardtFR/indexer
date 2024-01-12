@@ -6,6 +6,7 @@
 #include <QMap>
 #include <QString>
 #include <token.h>
+#include <lexer.h>
 
 #define STR_PTR(ptr) QString("0x%1").arg(reinterpret_cast<quintptr>(ptr), QT_POINTER_SIZE * 2, 16, QChar('0'))
 
@@ -17,7 +18,7 @@ public:
         qDebug() << __FUNCTION__;
     }
 
-    virtual void parse(QList<Token *> tokens) = 0;
+    virtual void parse(QList<Token *> tokens, Lexer lex) = 0;
     virtual void run() = 0;
 
 };
@@ -60,7 +61,7 @@ class CmdSearch : public TCmdFactory<CmdSearch> {
     void constructSearchCommand(QString nextCommandParam);
 
     // Implement virtual method
-    void parse(QList<Token *> tokens);
+    void parse(QList<Token *> tokens, Lexer lex);
     void run();
 
 };
@@ -75,7 +76,7 @@ class CmdGet : public TCmdFactory<CmdGet> {
     }
 
     // Implement virtual method
-    void parse(QList<Token *> tokens);
+    void parse(QList<Token *> tokens, Lexer lex);
     void run();
 };
 
@@ -87,7 +88,7 @@ class CmdAdd: public TCmdFactory<CmdAdd> {
     CmdAdd();
 
     // Implement virtual method
-    void parse(QList<Token *> tokens);
+    void parse(QList<Token *> tokens, Lexer lex);
     void run();
 };
 
@@ -100,7 +101,7 @@ public:
     }
 
     // Implement virtual method
-    void parse(QList<Token *> tokens);
+    void parse(QList<Token *> tokens, Lexer lex);
     void run();
 };
 
