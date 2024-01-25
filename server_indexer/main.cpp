@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
     bool in = true;
     Lexer olex;
     // changer le chemin
-    olex.loadDialect("C:/Users/Sandr/Documents/GitHub/indexer/server_indexer/dico.json");
+    olex.loadDialect("D:/YNOV/MASTER_2/SEMESTRE_1/indexer/dico.json");
 
     // on cree la Factory
     CmdFactory *factory = new CmdFactory;
@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
         //QString input = QLatin1String("SEARCH \"testme please\" LAST_MODIFIED:2 days CREATED:31/12/2020 MAX_SIZE:1M EXT:txt,doc,xlsx TYPE:image OR ");
         // test for clear
         //QString input = QLatin1String("CLEAR WHITELIST");
-        QString input = in ? QLatin1String("ADD WHITELIST myster") : QLatin1String("CLEAR WHITELIST");
+        QString input = in ? QLatin1String("ADD WHITELIST myster") : QLatin1String("SEARCH \"testme please\" LAST_MODIFIED:2 days CREATED:31/12/2020 MAX_SIZE:1M EXT:txt,doc,xlsx TYPE:image OR ");
 
         olex.setSource(input);
         foreach (auto token, olex.tokens())
@@ -64,6 +64,7 @@ int main(int argc, char *argv[]) {
         {
             Cmd *command = factory->create("CmdSearch");
             command->parse(olex.tokens());
+            test = true;
         }
     }
 
