@@ -113,16 +113,18 @@
         </transition>
     </state>
     <state id="list_extensions">
-        <qt:editorinfo stateColor="#c5bafc" geometry="1512.52;669.47;-60;-50;120;100" scenegeometry="1512.52;669.47;1452.52;619.47;120;100"/>
+        <qt:editorinfo stateColor="#c5bafc" geometry="1512.52;669.47;-129;-50;189;100" scenegeometry="1512.52;669.47;1383.52;619.47;189;100"/>
         <transition type="external" target="VERIF">
-            <qt:editorinfo localGeometry="765.84;0" endTargetFactors="55.39;91.75"/>
+            <qt:editorinfo localGeometry="800.34;0" endTargetFactors="55.39;91.75"/>
         </transition>
+        <transition type="external" event="is_EXT" target="list_extensions"/>
     </state>
     <state id="type_list_spec">
-        <qt:editorinfo stateColor="#c5bafc" geometry="1512.52;801.71;-60;-50;120;100" scenegeometry="1512.52;801.71;1452.52;751.71;120;100"/>
+        <qt:editorinfo stateColor="#c5bafc" geometry="1512.52;801.71;-129;-50;189;100" scenegeometry="1512.52;801.71;1383.52;751.71;189;100"/>
         <transition type="external" target="VERIF">
-            <qt:editorinfo localGeometry="792.21;0" endTargetFactors="77.37;87.44"/>
+            <qt:editorinfo localGeometry="826.71;0" endTargetFactors="77.37;87.44"/>
         </transition>
+        <transition type="external" event="is_TYPE" target="type_list_spec"/>
     </state>
     <state id="NUMBER">
         <qt:editorinfo stateColor="#a2d700" geometry="1752.77;238.86;-60;-50;120;100" scenegeometry="1752.77;238.86;1692.77;188.86;120;100"/>
