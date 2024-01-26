@@ -1,6 +1,7 @@
 QT = core
 QT += network
 QT += sql
+QT += scxml
 
 CONFIG += c++17 cmdline
 
@@ -35,3 +36,4 @@ DISTFILES += \
 
 STATECHARTS += \
     FSM_indexer.scxml
+

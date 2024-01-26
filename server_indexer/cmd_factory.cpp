@@ -54,10 +54,20 @@ void CmdSearch::parse(QList<Token *> tokens) {
     qDebug() << __FUNCTION__ << "on SEARCH";
     // TODO call state chart like this -> stateChart(this)
 
+    this->fsm_indexer = new FSM_indexer();
+
+
+    this->fsm_indexer->connectToState("LAST_MODIFIED", [this](bool active) {
+        qDebug() << "TEST2";
+    });
+
 }
 
 void CmdSearch::run() {
     qDebug() << __FUNCTION__ << "on SEARCH";
+
+
+
 }
 
 /** END CmdSearch **/

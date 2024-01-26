@@ -25,6 +25,8 @@ void mainwindow::initializeUIElements() {
     pushButton_search = ui->pushButton_search;
     lineEdit_query = ui->lineEdit_query;
     comboBox_filter = ui->comboBox_filter;
+
+    lineEdit_query->setText("SEARCH \"testme please\" LAST_MODIFIED:2 days CREATED:31/12/2020 MAX_SIZE:1M EXT:txt,doc,xlsx TYPE:image OR");
 }
 
 void mainwindow::initializeConnections() {
@@ -108,6 +110,8 @@ QString mainwindow::get_query() {
 void mainwindow::search() {
     // get query
     QString query = get_query();
+
+    qDebug() << "Query: " << query;
 
     // send event to the server
     emit event_search(query);

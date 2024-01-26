@@ -6,6 +6,7 @@
 #include <QMap>
 #include <QString>
 #include <token.h>
+#include "FSM_indexer.h"
 
 #define STR_PTR(ptr) QString("0x%1").arg(reinterpret_cast<quintptr>(ptr), QT_POINTER_SIZE * 2, 16, QChar('0'))
 
@@ -59,6 +60,9 @@ class CmdSearch : public TCmdFactory<CmdSearch> {
     // Implement virtual method
     void parse(QList<Token *> tokens);
     void run();
+
+private:
+    FSM_indexer *fsm_indexer;
 
 };
 

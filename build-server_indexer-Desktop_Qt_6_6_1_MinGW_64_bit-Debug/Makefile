@@ -178,8 +178,16 @@ Makefile: ../server_indexer/server_indexer.pro D:/Application/Qt/6.6.1/mingw_64/
 		D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_quicktestutilsprivate_private.pri \
 		D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_quickwidgets.pri \
 		D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_quickwidgets_private.pri \
+		D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_scxml.pri \
+		D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_scxml_private.pri \
+		D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_scxmlqml.pri \
+		D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_scxmlqml_private.pri \
 		D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_sql.pri \
 		D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_sql_private.pri \
+		D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_statemachine.pri \
+		D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_statemachine_private.pri \
+		D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_statemachineqml.pri \
+		D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_statemachineqml_private.pri \
 		D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_svg.pri \
 		D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_svg_private.pri \
 		D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_svgwidgets.pri \
@@ -199,6 +207,7 @@ Makefile: ../server_indexer/server_indexer.pro D:/Application/Qt/6.6.1/mingw_64/
 		D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/qt_config.prf \
 		D:/Application/Qt/6.6.1/mingw_64/mkspecs/win32-g++/qmake.conf \
 		D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/exclusive_builds.prf \
 		D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/toolchain.prf \
 		D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/default_pre.prf \
@@ -216,6 +225,7 @@ Makefile: ../server_indexer/server_indexer.pro D:/Application/Qt/6.6.1/mingw_64/
 		D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/resources_functions.prf \
 		D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/resources.prf \
 		D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/moc.prf \
+		D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/qscxmlc.prf \
 		D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/qmake_use.prf \
 		D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/file_copies.prf \
 		D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/testcase_targets.prf \
@@ -225,8 +235,8 @@ Makefile: ../server_indexer/server_indexer.pro D:/Application/Qt/6.6.1/mingw_64/
 		../server_indexer/server_indexer.pro \
 		D:/Application/Qt/6.6.1/mingw_64/lib/Qt6Network.prl \
 		D:/Application/Qt/6.6.1/mingw_64/lib/Qt6Sql.prl \
+		D:/Application/Qt/6.6.1/mingw_64/lib/Qt6Scxml.prl \
 		D:/Application/Qt/6.6.1/mingw_64/lib/Qt6Core.prl \
-		.qmake.stash \
 		D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/build_pass.prf
 	$(QMAKE) -o Makefile ..\server_indexer\server_indexer.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug"
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/spec_pre.prf:
@@ -337,8 +347,16 @@ D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_quicktemplates2_private.
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_quicktestutilsprivate_private.pri:
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_quickwidgets.pri:
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_quickwidgets_private.pri:
+D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_scxml.pri:
+D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_scxml_private.pri:
+D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_scxmlqml.pri:
+D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_scxmlqml_private.pri:
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_sql.pri:
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_sql_private.pri:
+D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_statemachine.pri:
+D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_statemachine_private.pri:
+D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_statemachineqml.pri:
+D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_statemachineqml_private.pri:
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_svg.pri:
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_svg_private.pri:
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/modules/qt_lib_svgwidgets.pri:
@@ -358,6 +376,7 @@ D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/qt_functions.prf:
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/qt_config.prf:
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/win32-g++/qmake.conf:
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/spec_post.prf:
+.qmake.stash:
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/exclusive_builds.prf:
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/toolchain.prf:
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/default_pre.prf:
@@ -375,6 +394,7 @@ D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/qt.prf:
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/resources_functions.prf:
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/resources.prf:
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/moc.prf:
+D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/qscxmlc.prf:
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/qmake_use.prf:
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/file_copies.prf:
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/testcase_targets.prf:
@@ -384,8 +404,8 @@ D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/lex.prf:
 ../server_indexer/server_indexer.pro:
 D:/Application/Qt/6.6.1/mingw_64/lib/Qt6Network.prl:
 D:/Application/Qt/6.6.1/mingw_64/lib/Qt6Sql.prl:
+D:/Application/Qt/6.6.1/mingw_64/lib/Qt6Scxml.prl:
 D:/Application/Qt/6.6.1/mingw_64/lib/Qt6Core.prl:
-.qmake.stash:
 D:/Application/Qt/6.6.1/mingw_64/mkspecs/features/build_pass.prf:
 qmake: FORCE
 	@$(QMAKE) -o Makefile ..\server_indexer\server_indexer.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug"

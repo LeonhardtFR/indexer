@@ -1,6 +1,7 @@
 #include "server.h"
 #include "lexer.h"
 #include "db_indexer.h"
+#include "cmd_factory.h"
 
 Lexer lex;
 
@@ -75,21 +76,65 @@ void server::handleSocketData() {
 
     if(data.startsWith("search")) {
         QString query = data.section(':', 1);
+
         this->handleSearchFiles(query, clientSocket); // envoie commande de recherche
     }
 }
 
 // Méthode pour gérer la recherche de fichiers
-void server::handleSearchFiles(const QString &query, QTcpSocket *socket) {
-    QStringList results = searchFiles(query);
-    //lex.setSource(query);
-    //lex.tokenize();
-    qDebug() << "Info: Found" << results.size() << "results for" << query;
-    for (const QString &result : results) {
+// void server::handleSearchFiles(const QString &query, QTcpSocket *socket) {
+//     QStringList results = searchFiles(query);
+//     //lex.setSource(query);
+//     //lex.tokenize();
+//     qDebug() << "Info: Found" << results.size() << "results for" << query;
+//     for (const QString &result : results) {
 
-        socket->write(result.toUtf8() + "\n");
+//         socket->write(result.toUtf8() + "\n");
+//     }
+// }
+
+
+void server::handleSearchFiles(const QString &query, QTcpSocket *socket) {
+    Lexer olex;
+
+    qDebug() << "TEEESSTTT";
+
+    olex.loadDialect("D:/YNOV/MASTER_2/SEMESTRE_1/indexer/dico.json");
+    olex.setSource(query);
+
+    // on cree la Factory
+    CmdFactory *factory = new CmdFactory;
+
+    QString s = olex.tokens()[0]->text();
+
+    qDebug() << "Info: Found" << s << "for" << query;
+
+    Cmd *command = nullptr;
+
+    if(s == "ADD") {
+        command = factory->create("CmdAdd");
+    } else if(s == "GET") {
+        command = factory->create("CmdGet");
+    } else if(s == "CLEAR") {
+        command = factory->create("CmdClear");
+    } else if(s == "SEARCH") {
+        qDebug() << "Info: Searching for" << query;
+        command = factory->create("CmdSearch");
     }
+
+    if(command) {
+        command->parse(olex.tokens());
+        // Exécuter la commande et gérer les résultats
+    }
+
+    // Envoyer les résultats via le socket
+    // QStringList results = searchFiles(query);
+    // qDebug() << "Info: Found" << results.size() << "results for" << query;
+    // for (const QString &result : results) {
+    //     socket->write(result.toUtf8() + "\n");
+    // }
 }
+
 
 // Méthode pour gérer les erreurs de socket
 void server::handleSocketError(QAbstractSocket::SocketError error) {
