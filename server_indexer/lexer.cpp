@@ -9,6 +9,7 @@
 #include <QJsonObject>
 #include <QRegularExpression>
 #include <iostream>
+#include <QCoreApplication>
 
 
 QDebug operator<<(QDebug debug, const Token &token) {
@@ -236,32 +237,37 @@ void Lexer::addToken(QStringList tokens) {
 
 
 
-void Lexer::loadDialect(QString filename) {
+void Lexer::loadDialect() {
     qDebug() << __FUNCTION__;
-    // load the file
-    QFile file(filename);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        qWarning() << "Dialect file missing !!";
+
+    // Utilisez le chemin de la ressource ici
+    QFile file(":/dico.json"); // Remplacez ceci par le chemin correct de la ressource
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qWarning() << "Failed to open dialect resource file";
+        return;
+    }
+
     QString dialect = file.readAll();
     file.close();
 
     // parse json
     QJsonParseError jsonError;
-    QJsonDocument   doc = QJsonDocument::fromJson(dialect.toUtf8(), &jsonError);
+    QJsonDocument doc = QJsonDocument::fromJson(dialect.toUtf8(), &jsonError);
     if (doc.isNull()) {
         qDebug() << "Parse failed";
+        return;
     }
     if (jsonError.error != QJsonParseError::NoError) {
-        qDebug() << QString("Error while parsing dialect (%1): %2").arg(filename, jsonError.errorString());
+        qDebug() << "Error while parsing dialect: " << jsonError.errorString();
         return;
     }
 
-    // load the json into the qmap
+    // load the json into the QMap
     if (doc.isObject()) {
         QJsonObject jsonObj = doc.object();
-        foreach (auto topic, jsonObj.keys()) {
-            foreach (auto word, jsonObj[topic].toArray().toVariantList()) {
-                _dictionary[topic] << word.toString();
+        foreach (const QString &topic, jsonObj.keys()) {
+            foreach (const QJsonValue &value, jsonObj[topic].toArray()) {
+                _dictionary[topic] << value.toString();
             }
         }
     }

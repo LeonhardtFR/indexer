@@ -99,7 +99,7 @@ void server::handleSearchFiles(const QString &query, QTcpSocket *socket) {
 
     qDebug() << "TEEESSTTT";
 
-    olex.loadDialect("D:/YNOV/MASTER_2/SEMESTRE_1/indexer/dico.json");
+    olex.loadDialect();
     olex.setSource(query);
 
     // on cree la Factory

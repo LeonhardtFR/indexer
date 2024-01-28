@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>dico.json</file>
+    </qresource>
+</RCC>
+

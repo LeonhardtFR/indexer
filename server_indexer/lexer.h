@@ -28,7 +28,7 @@ public:
     void resetToken();
     const Token &getCurrentToken();
 
-    void loadDialect(QString filename);
+    void loadDialect();
     void addToken(QStringList tokens);
     void tokenize();
 

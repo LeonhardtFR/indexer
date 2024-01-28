@@ -32,8 +32,12 @@ HEADERS += \
     token.h
 
 DISTFILES += \
-    dialect_file.json
+    dialect_file.json \
+    dico.json
 
 STATECHARTS += \
     FSM_indexer.scxml
+
+RESOURCES += \
+    ressource.qrc
 
