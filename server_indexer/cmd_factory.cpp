@@ -47,28 +47,204 @@ static void executeCommand(QString request)
 }
 
 /** CmdSearch class **/
-
 CmdSearch::CmdSearch() {}
 
 void CmdSearch::parse(QList<Token *> tokens) {
     qDebug() << __FUNCTION__ << "on SEARCH";
-    // TODO call state chart like this -> stateChart(this)
 
-    this->fsm_indexer = new FSM_indexer();
+    QString currentKey;
+    QString currentValue;
+    bool isValue = false;
 
+    for (Token* token : tokens) {
+        QString tokenText = token->text();
 
-    this->fsm_indexer->connectToState("LAST_MODIFIED", [this](bool active) {
-        qDebug() << "TEST2";
-    });
+        if (tokenText == ":") { // Si le token est un deux-points, le prochain token sera une valeur
+            isValue = true;
+            continue;
+        }
 
+        if (isValue) { // Si nous traitons une valeur
+            currentValue = tokenText;
+            isValue = false; // Réinitialiser pour le prochain token clé
+
+            // Traiter la paire clé-valeur
+            if (!currentKey.isEmpty() && !currentValue.isEmpty()) {
+                qDebug() << "Clé:" << currentKey << "Valeur:" << currentValue;
+
+                if (currentKey == "LAST_MODIFIED" || currentKey == "CREATED") {
+                    parseDateSpec(currentKey, currentValue);
+                } else if (currentKey == "MAX_SIZE" || currentKey == "MIN_SIZE" || currentKey == "SIZE") {
+                    parseSizeSpec(currentKey, currentValue);
+                } else if (currentKey == "EXT" || currentKey == "TYPE") {
+                    parseListSpec(currentKey, currentValue);
+                }
+
+                // Réinitialiser pour la prochaine paire clé-valeur
+                currentKey = "";
+                currentValue = "";
+            }
+        } else { // Si nous traitons une clé
+            currentKey = tokenText;
+        }
+    }
 }
 
+
+// Gestion des erreurs et des exceptions
 void CmdSearch::run() {
-    qDebug() << __FUNCTION__ << "on SEARCH";
+    QString sqlQuery = buildSQLQuery();
+    if (sqlQuery.isEmpty()) {
+        qDebug() << "Requête SQL vide ou invalide";
+        return;
+    }
 
-
-
+    // Exécution de la requête SQL
+    executeCommand(sqlQuery);
 }
+
+void CmdSearch::parseDateSpec(const QString& key, const QString& value) {
+    if (key == "LAST_MODIFIED") {
+        lastModified = value;
+    } else if (key == "CREATED") {
+        created = value;
+    }
+    // Valider le format de la date
+    if (!validateDateFormat(value)) {
+        qDebug() << "Invalid date format for" << key;
+        return;
+    }
+
+    // Ajouter la logique pour traiter différentes spécifications de date
+    if (value.contains("BETWEEN")) {
+        // Traitement des dates dans une plage
+        QStringList dateRange = value.split(" AND ");
+        // Vous devez ajouter votre propre logique pour gérer cette plage de dates
+    } else if (value.contains("SINCE LAST") || value.contains("AGO")) {
+        // Traitement des expressions relatives au temps
+        // Vous devez ajouter votre propre logique pour convertir ces expressions en dates concrètes
+    }
+}
+
+void CmdSearch::parseSizeSpec(const QString& key, const QString& value) {
+    if (key == "MAX_SIZE") {
+        maxSize = value;
+    } else if (key == "MIN_SIZE") {
+        minSize = value;
+    } else if (key == "SIZE") {
+        sizeRange = value;
+    }
+    // Valider le format de la taille
+    if (!validateSizeFormat(value)) {
+        qDebug() << "Invalid size format for" << key;
+        return;
+    }
+}
+
+void CmdSearch::parseListSpec(const QString& key, const QString& value) {
+    QString modifiedValue = value;
+    if (key == "EXT") {
+        extList = modifiedValue.replace(" OR ", ", ");
+    } else if (key == "TYPE") {
+        typeList = modifiedValue.replace(" OR ", ", ");
+    }
+}
+
+// Fonction pour analyser la condition de taille
+QString CmdSearch::parseSizeCondition(const QString& maxSize, const QString& minSize, const QString& sizeRange) {
+    QStringList sizeConditions;
+    if (!maxSize.isEmpty()) {
+        sizeConditions << "file_size <= " + maxSize;
+    }
+    if (!minSize.isEmpty()) {
+        sizeConditions << "file_size >= " + minSize;
+    }
+    if (!sizeRange.isEmpty()) {
+        QStringList range = sizeRange.split(" AND ");
+        if (range.size() == 2) {
+            sizeConditions << "file_size BETWEEN " + range[0] + " AND " + range[1];
+        }
+    }
+    return sizeConditions.join(" AND ");
+}
+
+// Fonction pour analyser la condition de date
+QString CmdSearch::parseDateCondition(const QString& field, const QString& dateSpec) {
+    // Logique pour convertir la spécification de date en condition SQL
+    // Exemple de traitement d'une plage de dates
+    if (dateSpec.contains("BETWEEN")) {
+        QStringList dateRange = dateSpec.split(" AND ");
+        if (dateRange.size() == 2) {
+            return field + " BETWEEN '" + dateRange[0] + "' AND '" + dateRange[1] + "'";
+        }
+    }
+    // Exemple de traitement des spécifications relatives au temps
+    else if (dateSpec.contains("SINCE LAST") || dateSpec.contains("AGO")) {
+        // Vous devez ajouter votre propre logique pour convertir ces expressions en dates concrètes
+    }
+    return field + " = '" + dateSpec + "'"; // Ceci est un exemple simplifié
+}
+
+bool CmdSearch::validateDateFormat(const QString& date) {
+    QRegularExpression dateRegex("^(\\d{2}/\\d{2}/\\d{4}|\\d{2}/\\d{4}|\\d{4}|\\d{2}|SINCE LAST \\d+ (MINUTES|HOURS|DAYS|MONTHS|YEARS)|\\d+ (MINUTES|HOURS|DAYS|MONTHS|YEARS) AGO)$");
+    return dateRegex.match(date).hasMatch();
+}
+
+bool CmdSearch::validateSizeFormat(const QString& size) {
+    QRegularExpression sizeRegex("^(\\d+(K|M|G)|BETWEEN \\d+(K|M|G) AND \\d+(K|M|G))$");
+    return sizeRegex.match(size).hasMatch();
+}
+
+QString CmdSearch::buildSQLQuery() {
+    QString query = "SELECT * FROM files";
+    QStringList conditions;
+
+    if (!filename.isEmpty()) {
+        conditions << "filename LIKE '%" + filename + "%'";
+    }
+    if (!lastModified.isEmpty()) {
+        conditions << parseDateCondition("last_modified", lastModified);
+    }
+    if (!created.isEmpty()) {
+        conditions << parseDateCondition("created", created);
+    }
+    if (!maxSize.isEmpty() || !minSize.isEmpty() || !sizeRange.isEmpty()) {
+        conditions << parseSizeCondition(maxSize, minSize, sizeRange);
+    }
+    if (!extList.isEmpty()) {
+        conditions << "file_extension IN (" + extList + ")";
+    }
+    if (!typeList.isEmpty()) {
+        conditions << "file_type IN (" + typeList + ")";
+    }
+    if (!conditions.isEmpty()) {
+        query += " WHERE " + conditions.join(" AND ");
+    }
+    return query;
+}
+
+
+// CmdSearch::CmdSearch() {}
+
+// void CmdSearch::parse(QList<Token *> tokens) {
+//     qDebug() << __FUNCTION__ << "on SEARCH";
+//     // TODO call state chart like this -> stateChart(this)
+
+//     this->fsm_indexer = new FSM_indexer();
+
+
+//     this->fsm_indexer->connectToState("LAST_MODIFIED", [this](bool active) {
+//         qDebug() << "TEST2";
+//     });
+
+// }
+
+// void CmdSearch::run() {
+//     qDebug() << __FUNCTION__ << "on SEARCH";
+
+
+
+// }
 
 /** END CmdSearch **/
 

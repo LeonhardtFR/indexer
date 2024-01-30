@@ -7,6 +7,7 @@
 #include <QString>
 #include <token.h>
 #include "FSM_indexer.h"
+#include "QRegularExpression"
 
 #define STR_PTR(ptr) QString("0x%1").arg(reinterpret_cast<quintptr>(ptr), QT_POINTER_SIZE * 2, 16, QChar('0'))
 
@@ -20,6 +21,9 @@ public:
 
     virtual void parse(QList<Token *> tokens) = 0;
     virtual void run() = 0;
+
+private:
+
 
 };
 
@@ -52,6 +56,12 @@ class CmdSearch : public TCmdFactory<CmdSearch> {
     QString ext;
     QString type;
 
+    QString sizeRange;
+    QString extList;
+    QString typeList;
+    QRegularExpression dateRegex;
+    QRegularExpression sizeRegex;
+
     public:
     CmdSearch();
     // Attributes
@@ -63,6 +73,15 @@ class CmdSearch : public TCmdFactory<CmdSearch> {
 
 private:
     FSM_indexer *fsm_indexer;
+
+    void parseDateSpec(const QString& key, const QString& value);
+    void parseSizeSpec(const QString& key, const QString& value);
+    void parseListSpec(const QString& key, const QString& value);
+    bool validateDateFormat(const QString& date);
+    bool validateSizeFormat(const QString& size);
+    QString parseDateCondition(const QString& field, const QString& dateSpec);
+    QString parseSizeCondition(const QString& maxSize, const QString& minSize, const QString& sizeRange);
+    QString buildSQLQuery();
 
 };
 
