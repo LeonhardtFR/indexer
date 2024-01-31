@@ -55,7 +55,7 @@ void db_indexer::create_database() {
 
     QString tblFileCreate = R"(
         CREATE TABLE IF NOT EXISTS files (
-            last_modified TEXT, created TEXT, file_size TEXT, file_extension TEXT, file_type TEXT
+            file_name TEXT, last_modified TEXT, created TEXT, file_size TEXT, file_extension TEXT, file_type TEXT
         )
     )";
 

@@ -243,7 +243,7 @@ QString CmdSearch::buildSQLQuery() {
     QStringList conditions;
 
     if (!filename.isEmpty()) {
-        conditions << "filename LIKE '%" + filename + "%'";
+        conditions << "file_name LIKE '%" + filename + "%'";
     }
     if (!lastModified.isEmpty()) {
         conditions << parseDateCondition("last_modified", lastModified);
@@ -255,22 +255,9 @@ QString CmdSearch::buildSQLQuery() {
         conditions << parseSizeCondition(maxSize, minSize, sizeRange);
     }
     if (!extList.isEmpty()) {
-        // met les différents élement de la liste entre ''
-        QStringList items = extList.split(", ");
-        for (int i = 0; i < items.size(); ++i) {
-            items[i] = items[i].trimmed(); // Retire les espaces autour de chaque élément
-            items[i] = "'" + items[i] + "'"; // Ajoute des guillemets autour de chaque élément
-        }
-        extList = items.join(", ");
         conditions << "file_extension IN (" + extList + ")";
     }
     if (!typeList.isEmpty()) {
-        QStringList items = typeList.split(", ");
-        for (int i = 0; i < items.size(); ++i) {
-            items[i] = items[i].trimmed(); // Retire les espaces autour de chaque élément
-            items[i] = "'" + items[i] + "'"; // Ajoute des guillemets autour de chaque élément
-        }
-        typeList = items.join(", ");
         conditions << "file_type IN (" + typeList + ")";
     }
     if (!conditions.isEmpty()) {
