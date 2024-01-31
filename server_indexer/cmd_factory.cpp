@@ -87,6 +87,7 @@ void CmdSearch::parse(QList<Token *> tokens) {
     if (!currentKey.isEmpty() && !currentValue.isEmpty()) {
         processKeyValue(currentKey, currentValue);
     }
+    this->run();
 }
 
 void CmdSearch::processKeyValue(const QString& key, const QString& value) {
@@ -105,6 +106,8 @@ void CmdSearch::processKeyValue(const QString& key, const QString& value) {
 
 // Gestion des erreurs et des exceptions
 void CmdSearch::run() {
+    qDebug() << __FUNCTION__ << "on Search class";
+
     QString sqlQuery = buildSQLQuery();
     if (sqlQuery.isEmpty()) {
         qDebug() << "Requête SQL vide ou invalide";
@@ -156,6 +159,7 @@ void CmdSearch::parseSizeSpec(const QString& key, const QString& value) {
 void CmdSearch::parseListSpec(const QString& key, const QString& value) {
     QString modifiedValue = value;
     if (key == "EXT") {
+        qDebug() << "ALLO" << extList;
         extList = modifiedValue.replace(" OR ", ", ");
     } else if (key == "TYPE") {
         typeList = modifiedValue.replace(" OR ", ", ");
@@ -166,10 +170,10 @@ void CmdSearch::parseListSpec(const QString& key, const QString& value) {
 QString CmdSearch::parseSizeCondition(const QString& maxSize, const QString& minSize, const QString& sizeRange) {
     QStringList sizeConditions;
     if (!maxSize.isEmpty()) {
-        sizeConditions << "file_size <= " + maxSize;
+        sizeConditions << "file_size <= '" + maxSize + "'";
     }
     if (!minSize.isEmpty()) {
-        sizeConditions << "file_size >= " + minSize;
+        sizeConditions << "file_size >= '" + minSize + "'";
     }
     if (!sizeRange.isEmpty()) {
         QStringList range = sizeRange.split(" AND ");
@@ -226,9 +230,22 @@ QString CmdSearch::buildSQLQuery() {
         conditions << parseSizeCondition(maxSize, minSize, sizeRange);
     }
     if (!extList.isEmpty()) {
+        // met les différents élement de la liste entre ''
+        QStringList items = extList.split(", ");
+        for (int i = 0; i < items.size(); ++i) {
+            items[i] = items[i].trimmed(); // Retire les espaces autour de chaque élément
+            items[i] = "'" + items[i] + "'"; // Ajoute des guillemets autour de chaque élément
+        }
+        extList = items.join(", ");
         conditions << "file_extension IN (" + extList + ")";
     }
     if (!typeList.isEmpty()) {
+        QStringList items = typeList.split(", ");
+        for (int i = 0; i < items.size(); ++i) {
+            items[i] = items[i].trimmed(); // Retire les espaces autour de chaque élément
+            items[i] = "'" + items[i] + "'"; // Ajoute des guillemets autour de chaque élément
+        }
+        typeList = items.join(", ");
         conditions << "file_type IN (" + typeList + ")";
     }
     if (!conditions.isEmpty()) {
@@ -236,29 +253,6 @@ QString CmdSearch::buildSQLQuery() {
     }
     return query;
 }
-
-
-// CmdSearch::CmdSearch() {}
-
-// void CmdSearch::parse(QList<Token *> tokens) {
-//     qDebug() << __FUNCTION__ << "on SEARCH";
-//     // TODO call state chart like this -> stateChart(this)
-
-//     this->fsm_indexer = new FSM_indexer();
-
-
-//     this->fsm_indexer->connectToState("LAST_MODIFIED", [this](bool active) {
-//         qDebug() << "TEST2";
-//     });
-
-// }
-
-// void CmdSearch::run() {
-//     qDebug() << __FUNCTION__ << "on SEARCH";
-
-
-
-// }
 
 /** END CmdSearch **/
 

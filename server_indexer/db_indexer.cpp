@@ -30,7 +30,7 @@ void db_indexer::create_database() {
     }
 
     QSqlQuery dropQuery(db);
-    if (!dropQuery.exec("DROP TABLE IF EXISTS whitelist")) {
+    if (!dropQuery.exec("DROP TABLE IF EXISTS files")) {
         qFatal() << "Error: " << dropQuery.lastError().text();
         return;
     }
@@ -47,9 +47,15 @@ void db_indexer::create_database() {
         )
     )";*/
 
-    QString tblFileCreate = R"(
+    /**QString tblFileCreate = R"(
         CREATE TABLE IF NOT EXISTS whitelist (
             folderPath TEXT
+        )
+    )";**/
+
+    QString tblFileCreate = R"(
+        CREATE TABLE IF NOT EXISTS files (
+            last_modified TEXT, created TEXT, file_size TEXT, file_extension TEXT, file_type TEXT
         )
     )";
 
@@ -64,9 +70,9 @@ void db_indexer::create_database() {
                      << query.value("fileSize").toUInt() << query.value("fileMTime").toUInt()
                      << query.value("fileLastCheck").toUInt();
         }*/
-    if(query.exec("SELECT * FROM whitelist")) {
+    if(query.exec("SELECT * FROM files")) {
         while (query.next()) {
-            qDebug() << query.value("folderPath").toUInt();
+            qDebug() << query.value("last_modified").toUInt();
         }
     } else {
         qFatal() << "Error: " << query.lastError().text();
