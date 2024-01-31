@@ -53,11 +53,23 @@ void db_indexer::create_database() {
         )
     )";**/
 
+    // QString tblFileCreate = R"(
+    //     CREATE TABLE IF NOT EXISTS files (
+    //         last_modified TEXT, created TEXT, file_size TEXT, file_extension TEXT, file_type TEXT
+    //     )
+    // )";
+
     QString tblFileCreate = R"(
-        CREATE TABLE IF NOT EXISTS files (
-            last_modified TEXT, created TEXT, file_size TEXT, file_extension TEXT, file_type TEXT
-        )
-    )";
+    CREATE TABLE IF NOT EXISTS files (
+        filename TEXT,
+        last_modified TEXT,
+        created TEXT,
+        file_size TEXT,
+        file_extension TEXT,
+        file_type TEXT
+    )
+)";
+
 
     if (!query.exec(tblFileCreate)) {
         qFatal() << "Error: " << query.lastError().text();
