@@ -59,36 +59,48 @@ void CmdSearch::parse(QList<Token *> tokens) {
     for (Token* token : tokens) {
         QString tokenText = token->text();
 
-        if (tokenText == ":") { // Si le token est un deux-points, le prochain token sera une valeur
-            isValue = true;
-            continue;
-        }
-
-        if (isValue) { // Si nous traitons une valeur
-            currentValue = tokenText;
-            isValue = false; // Réinitialiser pour le prochain token clé
-
-            // Traiter la paire clé-valeur
+        // Vérifier si le token est une clé connue
+        if (tokenText == "LAST_MODIFIED" || tokenText == "CREATED" || tokenText == "MAX_SIZE" || tokenText == "MIN_SIZE" || tokenText == "SIZE" || tokenText == "EXT" || tokenText == "TYPE") {
             if (!currentKey.isEmpty() && !currentValue.isEmpty()) {
-                qDebug() << "Clé:" << currentKey << "Valeur:" << currentValue;
-
-                if (currentKey == "LAST_MODIFIED" || currentKey == "CREATED") {
-                    parseDateSpec(currentKey, currentValue);
-                } else if (currentKey == "MAX_SIZE" || currentKey == "MIN_SIZE" || currentKey == "SIZE") {
-                    parseSizeSpec(currentKey, currentValue);
-                } else if (currentKey == "EXT" || currentKey == "TYPE") {
-                    parseListSpec(currentKey, currentValue);
-                }
+                // Traiter la paire clé-valeur précédente
+                processKeyValue(currentKey, currentValue);
 
                 // Réinitialiser pour la prochaine paire clé-valeur
                 currentKey = "";
                 currentValue = "";
             }
-        } else { // Si nous traitons une clé
             currentKey = tokenText;
+            isValue = false;
+        } else if (tokenText == ":") {
+            // Si le token est un deux-points, le prochain token sera une valeur
+            isValue = true;
+        } else if (isValue) {
+            // Accumuler la valeur (pour gérer les valeurs avec espaces)
+            if (!currentValue.isEmpty()) {
+                currentValue += " ";
+            }
+            currentValue += tokenText;
         }
     }
+
+    // Traiter la dernière paire clé-valeur si nécessaire
+    if (!currentKey.isEmpty() && !currentValue.isEmpty()) {
+        processKeyValue(currentKey, currentValue);
+    }
 }
+
+void CmdSearch::processKeyValue(const QString& key, const QString& value) {
+    qDebug() << "Clé:" << key << "Valeur:" << value;
+
+    if (key == "LAST_MODIFIED" || key == "CREATED") {
+        parseDateSpec(key, value);
+    } else if (key == "MAX_SIZE" || key == "MIN_SIZE" || key == "SIZE") {
+        parseSizeSpec(key, value);
+    } else if (key == "EXT" || key == "TYPE") {
+        parseListSpec(key, value);
+    }
+}
+
 
 
 // Gestion des erreurs et des exceptions
@@ -186,9 +198,11 @@ QString CmdSearch::parseDateCondition(const QString& field, const QString& dateS
 }
 
 bool CmdSearch::validateDateFormat(const QString& date) {
-    QRegularExpression dateRegex("^(\\d{2}/\\d{2}/\\d{4}|\\d{2}/\\d{4}|\\d{4}|\\d{2}|SINCE LAST \\d+ (MINUTES|HOURS|DAYS|MONTHS|YEARS)|\\d+ (MINUTES|HOURS|DAYS|MONTHS|YEARS) AGO)$");
+    qDebug() << "Validating date format:" << date;
+    QRegularExpression dateRegex("^\\d+\\s+(MINUTES|HOURS|DAYS|MONTHS|YEARS)$");
     return dateRegex.match(date).hasMatch();
 }
+
 
 bool CmdSearch::validateSizeFormat(const QString& size) {
     QRegularExpression sizeRegex("^(\\d+(K|M|G)|BETWEEN \\d+(K|M|G) AND \\d+(K|M|G))$");

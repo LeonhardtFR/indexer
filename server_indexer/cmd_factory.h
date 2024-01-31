@@ -82,6 +82,7 @@ private:
     QString parseDateCondition(const QString& field, const QString& dateSpec);
     QString parseSizeCondition(const QString& maxSize, const QString& minSize, const QString& sizeRange);
     QString buildSQLQuery();
+    void processKeyValue(const QString& key, const QString& value);
 
 };
 
