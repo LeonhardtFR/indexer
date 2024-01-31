@@ -57,10 +57,18 @@ void CmdSearch::parse(QList<Token *> tokens) {
     bool isValue = false;
 
     if (tokens.size() > 1) {
-        // Création d'une nouvelle chaîne à partir du texte du token
-        filename = QString(tokens[0]->text()).remove('\"'); // Supprimer les guillemets
-        tokens.removeFirst(); // Supprimer le premier token après le traitement
+        // Sauter le premier token si c'est "SEARCH"
+        if (tokens[0]->text().toUpper() == "SEARCH") {
+            tokens.removeFirst();
+        }
+
+        // Le prochain token est supposé être le terme de recherche
+        if (!tokens.isEmpty()) {
+            filename = QString(tokens[0]->text()).remove('\"'); // Supprimer les guillemets
+            tokens.removeFirst(); // Supprimer le premier token après le traitement
+        }
     }
+
 
     for (Token* token : tokens) {
         QString tokenText = token->text();
