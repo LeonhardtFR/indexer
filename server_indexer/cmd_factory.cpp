@@ -171,11 +171,10 @@ void CmdSearch::parseSizeSpec(const QString& key, const QString& value) {
 }
 
 void CmdSearch::parseListSpec(const QString& key, const QString& value) {
-    QString modifiedValue = value;
-    QStringList values = modifiedValue.split(",");
+    QStringList values = value.split(",", Qt::SkipEmptyParts);
     QStringList quotedValues;
     for (const QString &val : values) {
-        quotedValues << "'" + val.trimmed() + "'";
+        quotedValues << "'" + val.trimmed() + "'"; // Un seul guillemet
     }
     if (key == "EXT") {
         extList = quotedValues.join(", ");
@@ -183,6 +182,7 @@ void CmdSearch::parseListSpec(const QString& key, const QString& value) {
         typeList = quotedValues.join(", ");
     }
 }
+
 
 
 // Fonction pour analyser la condition de taille
@@ -260,6 +260,7 @@ QString CmdSearch::buildSQLQuery() {
     if (!typeList.isEmpty()) {
         conditions << "file_type IN (" + typeList + ")";
     }
+
     if (!conditions.isEmpty()) {
         query += " WHERE " + conditions.join(" AND ");
     }
