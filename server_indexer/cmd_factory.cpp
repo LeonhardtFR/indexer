@@ -56,6 +56,12 @@ void CmdSearch::parse(QList<Token *> tokens) {
     QString currentValue;
     bool isValue = false;
 
+    if (tokens.size() > 1) {
+        // Création d'une nouvelle chaîne à partir du texte du token
+        filename = QString(tokens[0]->text()).remove('\"'); // Supprimer les guillemets
+        tokens.removeFirst(); // Supprimer le premier token après le traitement
+    }
+
     for (Token* token : tokens) {
         QString tokenText = token->text();
 
@@ -158,13 +164,18 @@ void CmdSearch::parseSizeSpec(const QString& key, const QString& value) {
 
 void CmdSearch::parseListSpec(const QString& key, const QString& value) {
     QString modifiedValue = value;
+    QStringList values = modifiedValue.split(",");
+    QStringList quotedValues;
+    for (const QString &val : values) {
+        quotedValues << "'" + val.trimmed() + "'";
+    }
     if (key == "EXT") {
-        qDebug() << "ALLO" << extList;
-        extList = modifiedValue.replace(" OR ", ", ");
+        extList = quotedValues.join(", ");
     } else if (key == "TYPE") {
-        typeList = modifiedValue.replace(" OR ", ", ");
+        typeList = quotedValues.join(", ");
     }
 }
+
 
 // Fonction pour analyser la condition de taille
 QString CmdSearch::parseSizeCondition(const QString& maxSize, const QString& minSize, const QString& sizeRange) {
@@ -212,7 +223,6 @@ bool CmdSearch::validateDateFormat(const QString& date) {
         );
     return dateRegex.match(date).hasMatch();
 }
-
 
 
 bool CmdSearch::validateSizeFormat(const QString& size) {

@@ -26,7 +26,9 @@ void mainwindow::initializeUIElements() {
     lineEdit_query = ui->lineEdit_query;
     comboBox_filter = ui->comboBox_filter;
 
-    lineEdit_query->setText("SEARCH \"testme please\" LAST_MODIFIED:2 days CREATED:31/12/2020 MAX_SIZE:1M EXT:txt,doc,xlsx TYPE:image OR");
+    lineEdit_query->setText("SEARCH \"test\" EXT:txt");
+
+    // lineEdit_query->setText("SEARCH \"testme please\" LAST_MODIFIED:2 days CREATED:31/12/2020 MAX_SIZE:1M EXT:txt,doc,xlsx TYPE:image OR text");
 }
 
 void mainwindow::initializeConnections() {
