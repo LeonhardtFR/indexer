@@ -222,7 +222,8 @@ bool CmdSearch::validateDateFormat(const QString& date) {
 
 
 bool CmdSearch::validateSizeFormat(const QString& size) {
-    QRegularExpression sizeRegex("^(\\d+(K|M|G)|BETWEEN \\d+(K|M|G) AND \\d+(K|M|G))$", QRegularExpression::CaseInsensitiveOption);
+    QRegularExpression sizeRegex("^(\\d+(K|M|G)|BETWEEN \\d+(K|M|G) AND \\d+(K|M|G))$",
+                                 QRegularExpression::CaseInsensitiveOption);
     return sizeRegex.match(size).hasMatch();
 }
 

@@ -162,17 +162,9 @@
      <x>0</x>
      <y>0</y>
      <width>700</width>
-     <height>21</height>
+     <height>17</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuAide">
-    <property name="title">
-     <string>Menu</string>
-    </property>
-    <addaction name="actionOptions"/>
-    <addaction name="actionA_propos"/>
-   </widget>
-   <addaction name="menuAide"/>
   </widget>
   <action name="actionA_propos">
    <property name="text">

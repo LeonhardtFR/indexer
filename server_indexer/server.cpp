@@ -138,7 +138,7 @@ QStringList server::executeSearchQuery(const QString &sqlQuery) {
 
     if (q.exec()) {
         while (q.next()) {
-            results.append(q.value(0).toString());
+            results.append(q.value(0).toString()); // on ajoute les résultats à la liste de résultats
         }
     } else {
         qWarning("Error: Failed to execute search query: %s", qPrintable(q.lastError().text()));

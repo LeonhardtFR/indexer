@@ -6,6 +6,8 @@
 mainwindow::mainwindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::mainwindow) {
     ui->setupUi(this);
     this->setWindowTitle("Indexation de fichiers");
+    this->setWindowIcon(QIcon(":icone/icone.png"));
+
     initializeUIElements();
     initializeConnections();
     keyPressEvent(event);
@@ -156,7 +158,7 @@ void mainwindow::pause_indexing() {
     emit event_pause();
 }
 
-
+// lit les données du serveur, les analyse et les traite en fonction de leur contenu
 void mainwindow::readServerResponse() {
     QByteArray data = socket->readAll();
     QStringList messages = QString(data).split("\n", Qt::SkipEmptyParts);
@@ -164,12 +166,12 @@ void mainwindow::readServerResponse() {
     QList<FileInfo> fileResults;
 
     for (const QString &response : messages) {
-        if (response.startsWith("TOTAL_FILES:")) {
+        if (response.startsWith("TOTAL_FILES:")) { // mises à jour nombre total de fichiers
             handleTotalFilesUpdate(response);
-        } else if (response.startsWith("PROGRESS_UPDATE:")) {
+        } else if (response.startsWith("PROGRESS_UPDATE:")) { // mises à jour de la progression
             handleProgressUpdate(response);
         } else {
-            FileInfo fileInfo = FileInfo::fromPath(response);
+            FileInfo fileInfo = FileInfo::fromPath(response); // // chemin de fichier
             fileResults.append(fileInfo);
         }
     }
@@ -245,7 +247,7 @@ mainwindow::FileInfo mainwindow::FileInfo::fromPath(const QString& filePath) {
     double sizeInMb = sizeInBytes / (1024.0 * 1024.0);
     if (sizeInMb < 0.01) { // si taille du fichier est inférieure à 0.01 Mo on convertie taille en kilo-octets
         double sizeInKb = sizeInBytes / 1024.0;
-        info.sizeInMb = QString::number(sizeInKb, 'f', 2) + " Ko"; // formate la taille en Ko avec deux décimales
+        info.sizeInMb = QString::number(sizeInKb, 'f', 2) + " Ko"; // formate la taille en Ko
     } else {
         info.sizeInMb = QString::number(sizeInMb, 'f', 2) + " Mo";
     }

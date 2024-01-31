@@ -14,9 +14,7 @@ void fileindexer_worker::run() {
 
     QSqlDatabase db = db_indexer::getDatabaseConnection();
     QSqlQuery query(db);
-    // query.prepare(QLatin1String("INSERT OR REPLACE INTO files (filePath, fileSize, fileMTime, fileLastCheck) VALUES (?, ?, ?, ?)"));
     query.prepare(QLatin1String("INSERT OR REPLACE INTO files (filename, last_modified, created, file_size, file_extension, file_type) VALUES (?, ?, ?, ?, ?, ?)"));
-
 
     QDirIterator it(directory, QDirIterator::Subdirectories);
     int indexedFiles = 0;
@@ -31,21 +29,19 @@ void fileindexer_worker::run() {
         mutex.unlock();
 
         if (!it.hasNext()) break;
-        // QString filePath = it.next();
-        // QFileInfo fileInfo(filePath);
         QString filename = it.next();
         QFileInfo fileInfo(filename);
 
         if (fileInfo.isFile()) {
-            QString filename = fileInfo.fileName(); // Obtient juste le nom du fichier
-            QString fileExtension = fileInfo.suffix(); // Obtient l'extension du fichier
-            QString fileType; // Déterminer le type de fichier (peut-être basé sur l'extension ou d'autres critères)
+            QString filename = fileInfo.fileName(); // nom du fichier
+            QString fileExtension = fileInfo.suffix(); // l'extension du fichier
+            QString fileType; // type de fichier
 
             // Ajout des valeurs liées à la requête
             query.addBindValue(filename); // pour 'filename'
             query.addBindValue(fileInfo.lastModified().toSecsSinceEpoch()); // pour 'last_modified'
             query.addBindValue(currentSecs); // pour 'created', supposé que 'currentSecs' est la valeur correcte
-            query.addBindValue(fileInfo.size()); // pour 'file_size'
+            query.addBindValue(fileInfo.size()); // pour 'filesize'
             query.addBindValue(fileExtension); // pour 'file_extension'
             query.addBindValue(fileType); // pour 'file_type'
 
@@ -57,7 +53,7 @@ void fileindexer_worker::run() {
         }
     }
 
-    // Réinitialisation des états à la fin de l'exécution
+    // réinitialisation des états à la fin de l'exécution
     QMutexLocker locker(&mutex);
     isRunning = false;
     isPaused = false;
