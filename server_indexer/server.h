@@ -18,6 +18,7 @@ private:
     void handleSocketData();
     void handleSocketError(QAbstractSocket::SocketError error);
     void handleSearchFiles(const QString &query, QTcpSocket *socket);
+    void sendResultsToClient(const QStringList& results, QTcpSocket *socket);
     QStringList searchFiles(const QString &query);
     void sendIndexingProgress(int totalFiles, int indexedFiles);
 

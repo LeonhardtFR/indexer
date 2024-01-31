@@ -210,6 +210,8 @@ void mainwindow::updateFileResultsTable(const QList<FileInfo> &fileResults) {
     for (int i = 0; i < fileResults.size(); ++i) {
         const FileInfo &fileInfo = fileResults[i];
 
+        qDebug() << fileInfo.name << fileInfo.parentDir << fileInfo.date << fileInfo.type << fileInfo.sizeInMb;
+
         QTableWidgetItem *nameItem = new QTableWidgetItem(fileInfo.name);
         nameItem->setData(Qt::UserRole, fileInfo.fullPath);
         ui->tableWidget_results->setItem(i, 0, nameItem);

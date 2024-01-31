@@ -243,7 +243,7 @@ QString CmdSearch::buildSQLQuery() {
     QStringList conditions;
 
     if (!filename.isEmpty()) {
-        conditions << "file_name LIKE '%" + filename + "%'";
+        conditions << "filename LIKE '%" + filename + "%'";
     }
     if (!lastModified.isEmpty()) {
         conditions << parseDateCondition("last_modified", lastModified);

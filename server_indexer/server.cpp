@@ -127,23 +127,19 @@ void server::handleSearchFiles(const QString &query, QTcpSocket *socket) {
             QString sqlQuery = searchCommand->buildSQLQuery();
             QStringList results = executeSearchQuery(sqlQuery);
             qDebug() << "Executing SQL query:" << sqlQuery;
-            for (const QString &result : results) {
-                socket->write(result.toUtf8() + "\n");
+
+            if (!results.isEmpty()) {
+                // Envoyer les résultats uniquement s'ils ne sont pas vides
+                for (const QString &result : results) {
+                    socket->write(result.toUtf8() + "\n");
+                }
+            } else {
+                // Envoyer un message indiquant qu'aucun résultat n'a été trouvé
+                QString noResultMessage = "No results found for the query.";
+                socket->write(noResultMessage.toUtf8() + "\n");
             }
         }
     }
-
-    // if(command) {
-    //     command->parse(olex.tokens());
-    //     // Exécuter la commande et gérer les résultats
-    // }
-
-    // Envoyer les résultats via le socket
-    // QStringList results = searchFiles(query);
-    // qDebug() << "Info: Found" << results.size() << "results for" << query;
-    // for (const QString &result : results) {
-    //     socket->write(result.toUtf8() + "\n");
-    // }
 }
 
 QStringList server::executeSearchQuery(const QString &sqlQuery) {
