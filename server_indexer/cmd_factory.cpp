@@ -203,13 +203,20 @@ QString CmdSearch::parseDateCondition(const QString& field, const QString& dateS
 
 bool CmdSearch::validateDateFormat(const QString& date) {
     qDebug() << "Validating date format:" << date;
-    QRegularExpression dateRegex("^\\d+\\s+(MINUTES|HOURS|DAYS|MONTHS|YEARS)$");
+    QRegularExpression dateRegex(
+        "^(\\d{2}/\\d{2}/\\d{4}|\\d{2}/\\d{4}|\\d{4}|\\d{2}|"
+        "SINCE LAST \\d+ (MINUTES|HOURS|DAYS|MONTHS|YEARS)|"
+        "\\d+ (MINUTES|HOURS|DAYS|MONTHS|YEARS) AGO|"
+        "\\d+\\s+(MINUTES|HOURS|DAYS|MONTHS|YEARS))$",
+        QRegularExpression::CaseInsensitiveOption
+        );
     return dateRegex.match(date).hasMatch();
 }
 
 
+
 bool CmdSearch::validateSizeFormat(const QString& size) {
-    QRegularExpression sizeRegex("^(\\d+(K|M|G)|BETWEEN \\d+(K|M|G) AND \\d+(K|M|G))$");
+    QRegularExpression sizeRegex("^(\\d+(K|M|G)|BETWEEN \\d+(K|M|G) AND \\d+(K|M|G))$", QRegularExpression::CaseInsensitiveOption);
     return sizeRegex.match(size).hasMatch();
 }
 
