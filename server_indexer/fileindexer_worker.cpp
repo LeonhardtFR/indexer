@@ -37,11 +37,16 @@ void fileindexer_worker::run() {
             QString fileExtension = fileInfo.suffix(); // l'extension du fichier
             QString fileType; // type de fichier
 
+            // Récupérer la date de création du fichier ou la dernière modification si la date de création n'est pas disponible
+            QString createdDate = fileInfo.birthTime().isValid() ? fileInfo.birthTime().toString("yyyy-MM-dd") : fileInfo.lastModified().toString("yyyy-MM-dd");
+
+            qDebug() << filename << createdDate;
+
             // Ajout des valeurs liées à la requête
             query.addBindValue(filename); // pour 'filename'
             query.addBindValue(fileInfo.lastModified().toSecsSinceEpoch()); // pour 'last_modified'
-            query.addBindValue(currentSecs); // pour 'created', supposé que 'currentSecs' est la valeur correcte
-            query.addBindValue(fileInfo.size()); // pour 'filesize'
+            query.addBindValue(createdDate); // pour 'created'
+            query.addBindValue(fileInfo.size()); // pour 'file_size'
             query.addBindValue(fileExtension); // pour 'file_extension'
             query.addBindValue(fileType); // pour 'file_type'
 

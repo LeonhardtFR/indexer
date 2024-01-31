@@ -7,6 +7,7 @@
 #include "QSqlDatabase"
 #include "QSqlQuery"
 #include <QSqlError>
+#include "QDateTime"
 
 /** Util class **/
 
@@ -127,23 +128,29 @@ void CmdSearch::run() {
 }
 
 void CmdSearch::parseDateSpec(const QString& key, const QString& value) {
-    if (key == "LAST_MODIFIED") {
-        lastModified = value;
-    } else if (key == "CREATED") {
-        created = value;
-    }
-    // valider le format de la date
-    if (!validateDateFormat(value)) {
-        qDebug() << "Invalid date format for" << key;
-        return;
-    }
-
+    QDateTime date;
     if (value.contains("BETWEEN")) {
-        // traitement des dates dans une plage
-        QStringList dateRange = value.split(" AND ");
+        // Traitement des dates dans une plage - à compléter selon vos besoins
     } else if (value.contains("SINCE LAST") || value.contains("AGO")) {
+        // Traitement des expressions relatives au temps - à compléter selon vos besoins
+    } else {
+        // Traitement des dates au format dd/MM/yyyy
+        date = QDateTime::fromString(value, "dd/MM/yyyy");
+        if (!date.isValid()) {
+            qDebug() << "Invalid date format for" << key;
+            return;
+        }
+
+        QString formattedDate = date.toString("yyyy-MM-dd");
+        if (key == "CREATED") {
+            created = formattedDate;
+        } else if (key == "LAST_MODIFIED") {
+            lastModified = formattedDate;
+        }
     }
 }
+
+
 
 void CmdSearch::parseSizeSpec(const QString& key, const QString& value) {
     if (key == "MAX_SIZE") {
@@ -239,7 +246,7 @@ QString CmdSearch::buildSQLQuery() {
         conditions << parseDateCondition("last_modified", lastModified);
     }
     if (!created.isEmpty()) {
-        conditions << parseDateCondition("created", created);
+        conditions << "created = '" + created + "'";
     }
     if (!maxSize.isEmpty() || !minSize.isEmpty() || !sizeRange.isEmpty()) {
         conditions << parseSizeCondition(maxSize, minSize, sizeRange);
