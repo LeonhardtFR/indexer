@@ -171,11 +171,10 @@ void CmdSearch::parseSizeSpec(const QString& key, const QString& value) {
 }
 
 void CmdSearch::parseListSpec(const QString& key, const QString& value) {
-    QString modifiedValue = value;
-    QStringList values = modifiedValue.split(",");
+    QStringList values = value.split(",", Qt::SkipEmptyParts);
     QStringList quotedValues;
     for (const QString &val : values) {
-        quotedValues << "'" + val.trimmed() + "'";
+        quotedValues << "'" + val.trimmed() + "'"; // Un seul guillemet
     }
     if (key == "EXT") {
         extList = quotedValues.join(", ");
@@ -183,6 +182,7 @@ void CmdSearch::parseListSpec(const QString& key, const QString& value) {
         typeList = quotedValues.join(", ");
     }
 }
+
 
 
 // Fonction pour analyser la condition de taille
@@ -255,24 +255,12 @@ QString CmdSearch::buildSQLQuery() {
         conditions << parseSizeCondition(maxSize, minSize, sizeRange);
     }
     if (!extList.isEmpty()) {
-        // met les différents élement de la liste entre ''
-        QStringList items = extList.split(", ");
-        for (int i = 0; i < items.size(); ++i) {
-            items[i] = items[i].trimmed(); // Retire les espaces autour de chaque élément
-            items[i] = "'" + items[i] + "'"; // Ajoute des guillemets autour de chaque élément
-        }
-        extList = items.join(", ");
         conditions << "file_extension IN (" + extList + ")";
     }
     if (!typeList.isEmpty()) {
-        QStringList items = typeList.split(", ");
-        for (int i = 0; i < items.size(); ++i) {
-            items[i] = items[i].trimmed(); // Retire les espaces autour de chaque élément
-            items[i] = "'" + items[i] + "'"; // Ajoute des guillemets autour de chaque élément
-        }
-        typeList = items.join(", ");
         conditions << "file_type IN (" + typeList + ")";
     }
+
     if (!conditions.isEmpty()) {
         query += " WHERE " + conditions.join(" AND ");
     }
