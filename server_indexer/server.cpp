@@ -81,18 +81,6 @@ void server::handleSocketData() {
     }
 }
 
-// Méthode pour gérer la recherche de fichiers
-// void server::handleSearchFiles(const QString &query, QTcpSocket *socket) {
-//     QStringList results = searchFiles(query);
-//     //lex.setSource(query);
-//     //lex.tokenize();
-//     qDebug() << "Info: Found" << results.size() << "results for" << query;
-//     for (const QString &result : results) {
-
-//         socket->write(result.toUtf8() + "\n");
-//     }
-// }
-
 
 void server::handleSearchFiles(const QString &query, QTcpSocket *socket) {
     Lexer olex;
@@ -129,12 +117,12 @@ void server::handleSearchFiles(const QString &query, QTcpSocket *socket) {
             qDebug() << "Executing SQL query:" << sqlQuery;
 
             if (!results.isEmpty()) {
-                // Envoyer les résultats uniquement s'ils ne sont pas vides
+                // Envoie les résultats uniquement s'ils ne sont pas vides
                 for (const QString &result : results) {
                     socket->write(result.toUtf8() + "\n");
                 }
             } else {
-                // Envoyer un message indiquant qu'aucun résultat n'a été trouvé
+                // Envoie un message indiquant qu'aucun résultat n'a été trouvé
                 QString noResultMessage = "No results found for the query.";
                 socket->write(noResultMessage.toUtf8() + "\n");
             }
@@ -197,16 +185,11 @@ QStringList server::searchFiles(const QString &query) {
 void server::sendIndexingProgress(int totalFiles, int indexedFiles) {
         qDebug() << "Info: Sending indexing progress" << indexedFiles << "/" << totalFiles;
 
-    // QString progressData = QString::number(indexedFiles) + "/" + QString::number(totalFiles);
-    // QByteArray dataToSend = progressData.toUtf8() + "\n";
-
         QString TotalFiles = QString("TOTAL_FILES:") + QString::number(totalFiles);
         QString ProgressUpdate = QString("PROGRESS_UPDATE:") + QString::number(indexedFiles);
 
         QByteArray totalFilesData = TotalFiles.toUtf8() + "\n";
         QByteArray progressUpdateData = ProgressUpdate.toUtf8() + "\n";
-
-        // QByteArray dataToSend = TotalFiles.toUtf8() + "\n" + ProgressUpdate.toUtf8() + "\n";
 
     // Envoyer les données à tous les clients connectés
     for(QTcpSocket* socket : clientSockets) {

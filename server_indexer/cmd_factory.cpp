@@ -36,19 +36,13 @@ static void executeCommand(QString request)
         qDebug() << "Erreur lors de l'exécution de la requête:" << query.lastError().text();
     }
 
-    // Test if values are insert
-    /*if(query.exec("SELECT * FROM " + this->folderType)) {
-        while (query.next()) {
-            qDebug() << query.value("folderPath");
-        }
-    }*/
-
     db.close();
 }
 
 /** CmdSearch class **/
 CmdSearch::CmdSearch() {}
 
+// Méthode pour analyser les tokens et construire les critères de recherche
 void CmdSearch::parse(QList<Token *> tokens) {
     qDebug() << __FUNCTION__ << "on SEARCH";
 
@@ -57,15 +51,14 @@ void CmdSearch::parse(QList<Token *> tokens) {
     bool isValue = false;
 
     if (tokens.size() > 1) {
-        // Sauter le premier token si c'est "SEARCH"
         if (tokens[0]->text().toUpper() == "SEARCH") {
             tokens.removeFirst();
         }
 
         // Le prochain token est supposé être le terme de recherche
         if (!tokens.isEmpty()) {
-            filename = QString(tokens[0]->text()).remove('\"'); // Supprimer les guillemets
-            tokens.removeFirst(); // Supprimer le premier token après le traitement
+            filename = QString(tokens[0]->text()).remove('\"');
+            tokens.removeFirst();
         }
     }
 
@@ -73,13 +66,13 @@ void CmdSearch::parse(QList<Token *> tokens) {
     for (Token* token : tokens) {
         QString tokenText = token->text();
 
-        // Vérifier si le token est une clé connue
+        // Vérifie si le token est une clé connue
         if (tokenText == "LAST_MODIFIED" || tokenText == "CREATED" || tokenText == "MAX_SIZE" || tokenText == "MIN_SIZE" || tokenText == "SIZE" || tokenText == "EXT" || tokenText == "TYPE") {
             if (!currentKey.isEmpty() && !currentValue.isEmpty()) {
                 // Traiter la paire clé-valeur précédente
                 processKeyValue(currentKey, currentValue);
 
-                // Réinitialiser pour la prochaine paire clé-valeur
+                // réinitialise pour la prochaine paire clé-valeur
                 currentKey = "";
                 currentValue = "";
             }
@@ -89,7 +82,7 @@ void CmdSearch::parse(QList<Token *> tokens) {
             // Si le token est un deux-points, le prochain token sera une valeur
             isValue = true;
         } else if (isValue) {
-            // Accumuler la valeur (pour gérer les valeurs avec espaces)
+            // gérer les valeurs avec espaces
             if (!currentValue.isEmpty()) {
                 currentValue += " ";
             }
@@ -97,13 +90,14 @@ void CmdSearch::parse(QList<Token *> tokens) {
         }
     }
 
-    // Traiter la dernière paire clé-valeur si nécessaire
+    // traite la dernière paire clé-valeur
     if (!currentKey.isEmpty() && !currentValue.isEmpty()) {
         processKeyValue(currentKey, currentValue);
     }
     this->run();
 }
 
+// Méthode pour traiter une paire clé-valeur de critères de recherche
 void CmdSearch::processKeyValue(const QString& key, const QString& value) {
     qDebug() << "Clé:" << key << "Valeur:" << value;
 
@@ -118,7 +112,7 @@ void CmdSearch::processKeyValue(const QString& key, const QString& value) {
 
 
 
-// Gestion des erreurs et des exceptions
+// Méthode exécutée pour lancer la recherche
 void CmdSearch::run() {
     qDebug() << __FUNCTION__ << "on Search class";
 
@@ -128,7 +122,7 @@ void CmdSearch::run() {
         return;
     }
 
-    // Exécution de la requête SQL
+    // exécution de la requête SQL
     executeCommand(sqlQuery);
 }
 
@@ -138,20 +132,16 @@ void CmdSearch::parseDateSpec(const QString& key, const QString& value) {
     } else if (key == "CREATED") {
         created = value;
     }
-    // Valider le format de la date
+    // valider le format de la date
     if (!validateDateFormat(value)) {
         qDebug() << "Invalid date format for" << key;
         return;
     }
 
-    // Ajouter la logique pour traiter différentes spécifications de date
     if (value.contains("BETWEEN")) {
-        // Traitement des dates dans une plage
+        // traitement des dates dans une plage
         QStringList dateRange = value.split(" AND ");
-        // Vous devez ajouter votre propre logique pour gérer cette plage de dates
     } else if (value.contains("SINCE LAST") || value.contains("AGO")) {
-        // Traitement des expressions relatives au temps
-        // Vous devez ajouter votre propre logique pour convertir ces expressions en dates concrètes
     }
 }
 
@@ -174,7 +164,7 @@ void CmdSearch::parseListSpec(const QString& key, const QString& value) {
     QStringList values = value.split(",", Qt::SkipEmptyParts);
     QStringList quotedValues;
     for (const QString &val : values) {
-        quotedValues << "'" + val.trimmed() + "'"; // Un seul guillemet
+        quotedValues << "'" + val.trimmed() + "'";
     }
     if (key == "EXT") {
         extList = quotedValues.join(", ");
@@ -205,19 +195,17 @@ QString CmdSearch::parseSizeCondition(const QString& maxSize, const QString& min
 
 // Fonction pour analyser la condition de date
 QString CmdSearch::parseDateCondition(const QString& field, const QString& dateSpec) {
-    // Logique pour convertir la spécification de date en condition SQL
-    // Exemple de traitement d'une plage de dates
+    // logique pour convertir la spécification de date en condition SQL
     if (dateSpec.contains("BETWEEN")) {
         QStringList dateRange = dateSpec.split(" AND ");
         if (dateRange.size() == 2) {
             return field + " BETWEEN '" + dateRange[0] + "' AND '" + dateRange[1] + "'";
         }
     }
-    // Exemple de traitement des spécifications relatives au temps
+    // traitement des spécifications relatives au temps
     else if (dateSpec.contains("SINCE LAST") || dateSpec.contains("AGO")) {
-        // Vous devez ajouter votre propre logique pour convertir ces expressions en dates concrètes
     }
-    return field + " = '" + dateSpec + "'"; // Ceci est un exemple simplifié
+    return field + " = '" + dateSpec + "'";
 }
 
 bool CmdSearch::validateDateFormat(const QString& date) {
@@ -238,6 +226,7 @@ bool CmdSearch::validateSizeFormat(const QString& size) {
     return sizeRegex.match(size).hasMatch();
 }
 
+// Méthode pour construire la requête SQL basée sur les critères de recherche
 QString CmdSearch::buildSQLQuery() {
     QString query = "SELECT * FROM files";
     QStringList conditions;
