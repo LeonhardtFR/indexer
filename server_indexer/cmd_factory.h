@@ -66,6 +66,8 @@ class CmdSearch : public TCmdFactory<CmdSearch> {
     CmdSearch();
     // Attributes
 
+    QString buildSQLQuery();
+
 
     // Implement virtual method
     void parse(QList<Token *> tokens);
@@ -81,7 +83,6 @@ private:
     bool validateSizeFormat(const QString& size);
     QString parseDateCondition(const QString& field, const QString& dateSpec);
     QString parseSizeCondition(const QString& maxSize, const QString& minSize, const QString& sizeRange);
-    QString buildSQLQuery();
     void processKeyValue(const QString& key, const QString& value);
 
 };

@@ -97,8 +97,6 @@ void server::handleSocketData() {
 void server::handleSearchFiles(const QString &query, QTcpSocket *socket) {
     Lexer olex;
 
-    qDebug() << "TEEESSTTT";
-
     olex.loadDialect();
     olex.setSource(query);
 
@@ -122,10 +120,23 @@ void server::handleSearchFiles(const QString &query, QTcpSocket *socket) {
         command = factory->create("CmdSearch");
     }
 
-    if(command) {
+    if (command) {
         command->parse(olex.tokens());
-        // Exécuter la commande et gérer les résultats
+
+        if (CmdSearch* searchCommand = dynamic_cast<CmdSearch*>(command)) {
+            QString sqlQuery = searchCommand->buildSQLQuery();
+            QStringList results = executeSearchQuery(sqlQuery);
+            qDebug() << "Executing SQL query:" << sqlQuery;
+            for (const QString &result : results) {
+                socket->write(result.toUtf8() + "\n");
+            }
+        }
     }
+
+    // if(command) {
+    //     command->parse(olex.tokens());
+    //     // Exécuter la commande et gérer les résultats
+    // }
 
     // Envoyer les résultats via le socket
     // QStringList results = searchFiles(query);
@@ -133,6 +144,24 @@ void server::handleSearchFiles(const QString &query, QTcpSocket *socket) {
     // for (const QString &result : results) {
     //     socket->write(result.toUtf8() + "\n");
     // }
+}
+
+QStringList server::executeSearchQuery(const QString &sqlQuery) {
+    QStringList results;
+    QSqlDatabase db = db_indexer::getDatabaseConnection();
+    QSqlQuery q(db);
+    q.prepare(sqlQuery);
+
+    if (q.exec()) {
+        while (q.next()) {
+            results.append(q.value(0).toString());
+        }
+    } else {
+        qWarning("Error: Failed to execute search query: %s", qPrintable(q.lastError().text()));
+    }
+
+    db.close();
+    return results;
 }
 
 

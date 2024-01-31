@@ -27,6 +27,8 @@ private:
     QString directory;
     QList<QTcpSocket*> clientSockets; // Liste des clients connectés
 
+    QStringList executeSearchQuery(const QString &sqlQuery);
+
 signals:
     void commandReceived(fileindexer_worker::Command command);
 };
