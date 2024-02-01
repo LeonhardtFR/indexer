@@ -82,7 +82,8 @@ private:
     bool validateDateFormat(const QString& date);
     bool validateSizeFormat(const QString& size);
     QString parseDateCondition(const QString& field, const QString& dateSpec);
-    QString parseSizeCondition(const QString& maxSize, const QString& minSize, const QString& sizeRange);
+    QString parseSizeCondition();
+    qint64 convertSizeToBytes(const QString& size);
     void processKeyValue(const QString& key, const QString& value);
 
 };

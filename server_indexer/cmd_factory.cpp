@@ -171,19 +171,22 @@ void CmdSearch::parseDateSpec(const QString& key, const QString& value) {
 
 
 void CmdSearch::parseSizeSpec(const QString& key, const QString& value) {
-    if (key == "MAX_SIZE") {
-        maxSize = value;
-    } else if (key == "MIN_SIZE") {
-        minSize = value;
-    } else if (key == "SIZE") {
-        sizeRange = value;
-    }
-    // Valider le format de la taille
-    if (!validateSizeFormat(value)) {
+    qint64 sizeInBytes = convertSizeToBytes(value);
+
+    if (sizeInBytes == -1) {
         qDebug() << "Invalid size format for" << key;
         return;
     }
+
+    if (key == "MAX_SIZE") {
+        maxSize = QString::number(sizeInBytes);
+    } else if (key == "MIN_SIZE") {
+        minSize = QString::number(sizeInBytes);
+    } else if (key == "SIZE") {
+        sizeRange = value; // La gestion de SIZE nécessitera des modifications supplémentaires
+    }
 }
+
 
 void CmdSearch::parseListSpec(const QString& key, const QString& value) {
     QStringList values = value.split(",", Qt::SkipEmptyParts);
@@ -201,13 +204,13 @@ void CmdSearch::parseListSpec(const QString& key, const QString& value) {
 
 
 // Fonction pour analyser la condition de taille
-QString CmdSearch::parseSizeCondition(const QString& maxSize, const QString& minSize, const QString& sizeRange) {
+QString CmdSearch::parseSizeCondition() {
     QStringList sizeConditions;
     if (!maxSize.isEmpty()) {
-        sizeConditions << "file_size <= '" + maxSize + "'";
+        sizeConditions << "file_size <= " + maxSize;
     }
     if (!minSize.isEmpty()) {
-        sizeConditions << "file_size >= '" + minSize + "'";
+        sizeConditions << "file_size >= " + minSize;
     }
     if (!sizeRange.isEmpty()) {
         QStringList range = sizeRange.split(" AND ");
@@ -217,6 +220,29 @@ QString CmdSearch::parseSizeCondition(const QString& maxSize, const QString& min
     }
     return sizeConditions.join(" AND ");
 }
+
+qint64 CmdSearch::convertSizeToBytes(const QString& size) {
+    QRegularExpression regex("^(\\d+)([KMG])$", QRegularExpression::CaseInsensitiveOption);
+    QRegularExpressionMatch match = regex.match(size);
+
+    if (!match.hasMatch()) {
+        return -1;
+    }
+
+    qint64 value = match.captured(1).toLongLong();
+    QString unit = match.captured(2).toUpper();
+
+    if (unit == "K") {
+        return value * 1024;
+    } else if (unit == "M") {
+        return value * 1024 * 1024;
+    } else if (unit == "G") {
+        return value * 1024 * 1024 * 1024;
+    }
+
+    return value;
+}
+
 
 // Fonction pour analyser la condition de date
 QString CmdSearch::parseDateCondition(const QString& field, const QString& dateSpec) {
@@ -264,7 +290,7 @@ QString CmdSearch::buildSQLQuery() {
         conditions << "created = '" + created + "'";
     }
     if (!maxSize.isEmpty() || !minSize.isEmpty() || !sizeRange.isEmpty()) {
-        conditions << parseSizeCondition(maxSize, minSize, sizeRange);
+        conditions << parseSizeCondition();
     }
     if (!extList.isEmpty()) {
         conditions << "file_extension IN (" + extList + ")";
