@@ -37,7 +37,7 @@ void fileindexer_worker::run() {
             QString fileExtension = fileInfo.suffix(); // l'extension du fichier
             QString fileType; // type de fichier
 
-            // Récupérer la date de création du fichier ou la dernière modification si la date de création n'est pas disponible
+            // Récupére la date de création du fichier ou la dernière modification si la date de création n'est pas disponible
             QString createdDate = fileInfo.birthTime().isValid() ? fileInfo.birthTime().toString("yyyy-MM-dd") : fileInfo.lastModified().toString("yyyy-MM-dd");
 
             QString lastModifiedDate = fileInfo.lastModified().toString("yyyy-MM-dd");
@@ -45,12 +45,12 @@ void fileindexer_worker::run() {
             qDebug() << filename << createdDate;
 
             // Ajout des valeurs liées à la requête
-            query.addBindValue(filename); // pour 'filename'
-            query.addBindValue(lastModifiedDate); // pour 'last_modified'
-            query.addBindValue(createdDate); // pour 'created'
-            query.addBindValue(fileInfo.size()); // pour 'file_size'
-            query.addBindValue(fileExtension); // pour 'file_extension'
-            query.addBindValue(fileType); // pour 'file_type'
+            query.addBindValue(filename);
+            query.addBindValue(lastModifiedDate);
+            query.addBindValue(createdDate);
+            query.addBindValue(fileInfo.size());
+            query.addBindValue(fileExtension);
+            query.addBindValue(fileType);
 
             if (!query.exec()) {
                 qWarning() << "Error: Failed to insert file: " << query.lastError().text();

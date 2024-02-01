@@ -43,7 +43,7 @@ void server::newConnection() {
 
 
     // Lecture des données
-    connect(clientSocket, &QTcpSocket::readyRead, this, &server::handleSocketData);
+    connect(clientSocket, &QTcpSocket::readyRead, this, &server::handleSocketData); // si le socket client a des données à lire, on appelle handleSocketData
 
     // Déconnexion
     connect(clientSocket, &QTcpSocket::disconnected, clientSocket, &QTcpSocket::deleteLater);
