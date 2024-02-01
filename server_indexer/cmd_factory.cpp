@@ -130,9 +130,17 @@ void CmdSearch::run() {
 void CmdSearch::parseDateSpec(const QString& key, const QString& value) {
     QDateTime date;
     if (value.contains("BETWEEN")) {
-        // Traitement des dates dans une plage - à compléter selon vos besoins
+        // TODO: traiter les dates comprises entre deux dates
     } else if (value.contains("SINCE LAST") || value.contains("AGO")) {
-        // Traitement des expressions relatives au temps - à compléter selon vos besoins
+        // TODO: traiter les dates depuis la dernière période
+
+    } else if (key == "LAST_MODIFIED" && value.contains(" DAYS")) {
+        qDebug() << "TEST5";
+        int days = value.split(" ")[0].toInt();
+        QDateTime now = QDateTime::currentDateTime();
+        QDateTime modifiedDate = now.addDays(-days);
+        QString formattedDate = modifiedDate.toString("yyyy-MM-dd");
+        lastModified = formattedDate;
     } else {
         // Traitement des dates au format dd/MM/yyyy
         date = QDateTime::fromString(value, "dd/MM/yyyy");
