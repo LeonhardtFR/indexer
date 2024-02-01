@@ -129,8 +129,18 @@ void CmdSearch::run() {
 
 void CmdSearch::parseDateSpec(const QString& key, const QString& value) {
     QDateTime date;
-    if (value.contains("BETWEEN")) {
-        // TODO: traiter les dates comprises entre deux dates
+    if (value.contains("BETWEEN", Qt::CaseInsensitive) && key.toUpper() == "LAST_MODIFIED") {
+        QStringList dateParts = value.split(" AND ", Qt::SkipEmptyParts, Qt::CaseInsensitive);
+        if (dateParts.size() == 2) {
+            int daysStart = dateParts[0].split(" ")[1].toInt(); // Extrait le nombre de jours (début)
+            int daysEnd = dateParts[1].split(" ")[0].toInt(); // Extrait le nombre de jours (fin)
+
+            QDateTime now = QDateTime::currentDateTime();
+            QString dateStart = now.addDays(-daysStart).toString("yyyy-MM-dd");
+            QString dateEnd = now.addDays(-daysEnd).toString("yyyy-MM-dd");
+
+            lastModified = "BETWEEN '" + dateStart + "' AND '" + dateEnd + "'";
+        }
     } else if (value.contains("SINCE LAST") || value.contains("AGO")) {
         // TODO: traiter les dates depuis la dernière période
 
@@ -211,11 +221,8 @@ QString CmdSearch::parseSizeCondition(const QString& maxSize, const QString& min
 // Fonction pour analyser la condition de date
 QString CmdSearch::parseDateCondition(const QString& field, const QString& dateSpec) {
     // logique pour convertir la spécification de date en condition SQL
-    if (dateSpec.contains("BETWEEN")) {
-        QStringList dateRange = dateSpec.split(" AND ");
-        if (dateRange.size() == 2) {
-            return field + " BETWEEN '" + dateRange[0] + "' AND '" + dateRange[1] + "'";
-        }
+    if (dateSpec.contains("BETWEEN", Qt::CaseInsensitive)) {
+        return field + " " + dateSpec;
     }
     // traitement des spécifications relatives au temps
     else if (dateSpec.contains("SINCE LAST") || dateSpec.contains("AGO")) {
